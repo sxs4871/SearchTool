@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     controller.cpp \
     userquery.cpp \
     hashdictionary.cpp \
-    connectiondialog.cpp
+    connectiondialog.cpp \
+    avu.cpp
 
 HEADERS  += mainwindow.h \
     view.h \
@@ -28,7 +29,8 @@ HEADERS  += mainwindow.h \
     controller.h \
     userquery.h \
     hashdictionary.h \
-    connectiondialog.h
+    connectiondialog.h \
+    avu.h
 
 FORMS    += mainwindow.ui \
     connectiondialog.ui

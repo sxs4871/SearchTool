@@ -1,41 +1,41 @@
 #include "view.h"
-#include <connectiondialog.h>
+#include <controller.h>
+#include <QDateTime>
+#include <QDebug>
+#include <QTableView>
 
-View::View(Ui::MainWindow* _ui, Controller* _c) {
+View::View(Ui::MainWindow* _ui) {
     if (_ui == 0) {
         new Ui::MainWindow();
     } else {
         ui = _ui;
     }
-    controller = _c;
     initView();
 }
 
 View::~View() {}
 
 void View::initView() {
-    model = Model::getInstance();
-
-    ui->frame_setValue->setStyleSheet("QFrame {border : 0px solid black; }");
 
     /* GroupBox setup */
     QString groupBoxStyle("QGroupBox {font-size: 14px; font-weight: bold;border: 1px solid gray;border-radius: 5px;margin-top: 0.5em;}\
             QGroupBox::title {subcontrol-origin: margin;left: 10px;padding: 0 3px 0 3px;}");
     ui->group_findAttr->setStyleSheet(groupBoxStyle);
-    ui->group_selectedAttr->setStyleSheet(groupBoxStyle);
-    ui->group_setVal->setStyleSheet(groupBoxStyle);
+    ui->group_fileAttributes->setStyleSheet(groupBoxStyle);
+    ui->group_setValue->setStyleSheet(groupBoxStyle);
+
 
     /* LineEdit setup */
     ui->lineEdit_findAttr->setStyleSheet("QLineEdit { border: 1px solid gray; border-radius: 10px; }");
+    ui->lineEdit_value->setStyleSheet("QLineEdit { border: 1px solid gray; border-radius: 10px; }");
+    ui->lineEdit_unit->setStyleSheet("QLineEdit { border: 1px solid gray; border-radius: 10px; }");
     ui->lineEdit_query->setStyleSheet("QLineEdit { border: 1px solid gray; border-radius: 13px; }");
     ui->lineEdit_findAttr->setPlaceholderText("  Find attribute...");
     ui->lineEdit_query->setPlaceholderText("   Enter your query...");
-    ui->lineEdit_enterUnit->setPlaceholderText("Enter units...");
-    ui->lineEdit_enterVal->setPlaceholderText("Enter value...");
 
     /* Table of results setup */
     ui->table_results->setColumnCount(3);
-    ui->table_results->setHorizontalHeaderLabels(QStringList() << "Size" << "Collection" << "Date modified");
+    ui->table_results->setHorizontalHeaderLabels(QStringList() << "File name" << "Collection" << "Date modified");
     ui->table_results->horizontalHeader()->setVisible(true);
     int tableWidth = ui->table_results->width();
     int colCount = ui->table_results->columnCount();
@@ -43,24 +43,45 @@ void View::initView() {
         ui->table_results->setColumnWidth(i, tableWidth / 3);
     }
     ui->table_results->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->table_results->horizontalHeader()->setStretchLastSection(true);
+    ui->table_results->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+
     ui->label_queryMessage->setHidden(true);
     ui->label_queryMessage->setFixedWidth(ui->table_results->width() - 20);
     ui->label_queryMessage->setWordWrap(true);
 
+
+    /* Table of attributes setup */
+    ui->table_attributes->setColumnCount(3);
+    ui->table_attributes->setHorizontalHeaderLabels(QStringList() << "Attribute name" << "Value" << "Unit");
+    ui->table_attributes->horizontalHeader()->setVisible(true);
+    ui->table_attributes->verticalHeader()->setVisible(false);
+    tableWidth = ui->table_attributes->width();
+    colCount = ui->table_attributes->columnCount();
+    ui->table_attributes->setColumnWidth(0, tableWidth / 7 * 3);
+    ui->table_attributes->setColumnWidth(1, tableWidth / 7 * 2);
+    ui->table_attributes->setColumnWidth(2, tableWidth / 7 * 2);
+    ui->table_attributes->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->table_attributes->horizontalHeader()->setStretchLastSection(true);
+    ui->table_attributes->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+
     /* Lists setup */
-    ui->list_selectedAttr->setStyleSheet("background-color: transparent;");
     ui->list_foundAttr->setStyleSheet("background-color: transparent;");
+}
 
-
+void View::setController(Controller* c) {
+    controller = c;
     /* connecting signals and slots */
     QObject::connect(ui->lineEdit_query, SIGNAL(returnPressed()), ui->button_search, SIGNAL(clicked()));
     QObject::connect(ui->button_search, SIGNAL(clicked()), this, SLOT(searchButtonClicked()));
     QObject::connect(ui->lineEdit_findAttr, SIGNAL(textChanged(QString)), this, SLOT(attributeSearchUpdated(QString)));
     QObject::connect(ui->button_disconnect, SIGNAL(clicked()), this, SLOT(disconnectButtonPressed()));
-    QObject::connect(model, SIGNAL(searchCompleted(QSqlQuery)), this, SLOT(modelFinishedSearch(QSqlQuery)));
-    QObject::connect(model, SIGNAL(foundAttributes(QStringList)), this, SLOT(modelFoundAttributes(QStringList)));
+    QObject::connect(ui->list_foundAttr, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(foundListDoubleClicked(QModelIndex)));
+    QObject::connect(ui->table_results, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(resultTableRowDoubleClicked(QModelIndex)));
+}
 
-    askForNewConnection();
+Controller* View::getController() {
+    return controller;
 }
 
 Ui::MainWindow* View::getUI() {
@@ -68,51 +89,16 @@ Ui::MainWindow* View::getUI() {
 }
 
 void View::askForNewConnection() {
-    ConnectionDialog cd;
-    cd.setModal(true);
-    cd.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-    cd.setDefaults();
-    if (cd.exec() == QDialog::Accepted) {
-        model = Model::getInstance();
-        model->readAllAttributes();
-        this->attributeSearchUpdated("");
-        QLabel* c = ui->label_connection;
-        c->setText("Connected to:  " + model->getDbName());
-        c->setStyleSheet("QLabel { color : green; }");
-        c->adjustSize();
-        c->setFixedHeight(27);
-        int x = c->x() + c->width() + 20;
-        int width = ui->group_setVal->x() + ui->group_setVal->width() - x;
-        ui->button_disconnect->setGeometry(x, c->y(), width , c->height());
-        ui->button_disconnect->setVisible(true);
-    }
+    cd = new ConnectionDialog(this);
+    cd->setFixedSize(cd->width(), cd->height());
+    cd->setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowTitleHint);
+    cd->setDefaults();
+    while (cd->exec() != QDialog::Accepted);
+    delete cd;
+    cd = 0;
 }
 
-/* slots */
-
-void View::searchButtonClicked() {
-    QString userQuery = ui->lineEdit_query->text();
-    if (userQuery == "") {
-        return;
-    }
-    controller->searchButtonClicked(userQuery);
-}
-
-void View::disconnectButtonPressed() {
-    model->disconnect();
-    ui->label_connection->setText("No connection  ");
-    ui->label_connection->setStyleSheet("QLabel { color : orange; }");
-    ui->button_disconnect->setVisible(false);
-    askForNewConnection();
-}
-
-void View::attributeSearchUpdated(QString text) {
-    controller->attributeSearchUpdated(text);
-}
-
-void View::modelFinishedSearch(QSqlQuery result) {
-    qDebug() << "Signal received";
-
+void View::updateSearchResults(QSqlQuery result) {
     ui->table_results->setRowCount(0);
     bool ok = result.isActive();
     if (!ok) {
@@ -148,8 +134,99 @@ void View::modelFinishedSearch(QSqlQuery result) {
     }
 }
 
-void View::modelFoundAttributes(QStringList attributes) {
-    attributes.sort();
+void View::updateFoundAttributes(QStringList attributes) {
     ui->list_foundAttr->clear();
     ui->list_foundAttr->addItems(attributes);
+}
+
+void View::showFileAttributes(QList<AVU> avus, QString fileName) {
+    QString title = "\"" + fileName + "\" attributes";
+    ui->group_fileAttributes->setTitle(title);
+    ui->table_attributes->setRowCount(0);
+    int tableSize = avus.count();
+    for (int i = 0; i < tableSize; i++) {
+        AVU curAVU = avus.at(i);
+        ui->table_attributes->insertRow(ui->table_attributes->rowCount());
+        ui->table_attributes->setItem(i, 0, new QTableWidgetItem(curAVU[0]));
+        ui->table_attributes->setItem(i, 1, new QTableWidgetItem(curAVU[1]));
+        ui->table_attributes->setItem(i, 2, new QTableWidgetItem(curAVU[2]));
+    }
+}
+
+void View::displayConnection(QString dbName) {
+    this->attributeSearchUpdated("");
+    QLabel* c = ui->label_connection;
+    c->setText("Connected to:  \"" + dbName + "\"");
+    c->setStyleSheet("QLabel { color : green; }");
+    c->adjustSize();
+    c->setFixedHeight(27);
+    int x = c->x() + c->width() + 20;
+    int width = ui->table_attributes->x() + ui->table_attributes->width() - x;
+    ui->button_disconnect->setGeometry(x, c->y(), width , c->height());
+    ui->button_disconnect->setVisible(true);
+}
+
+void View::closeConnection() {
+    ui->label_connection->setText("No connection  ");
+    ui->label_connection->setStyleSheet("QLabel { color : orange; }");
+    ui->button_disconnect->setVisible(false);
+}
+
+void View::closeDialog() {
+    if (cd != 0) {
+        cd->accept();
+    }
+}
+
+void View::setDialogConnectionError(QString errorText) {
+    cd->setConnectionError(errorText);
+}
+
+void View::quit() {
+    closeDialog();
+    qApp->quit();
+}
+
+
+/* slots */
+
+void View::searchButtonClicked() {
+    QString userQuery = ui->lineEdit_query->text();
+    if (userQuery == "") {
+        return;
+    }
+    controller->searchButtonClicked(userQuery);
+}
+
+void View::disconnectButtonPressed() {
+    controller->disconnectButtonPressed();
+}
+
+void View::attributeSearchUpdated(QString text) {
+    controller->attributeSearchUpdated(text);
+}
+
+void View::dialogConnectPressed() {
+    QStringList connectionParams = cd->getConnectionInfo();
+    controller->connectButtonPressed(connectionParams);
+}
+
+void View::dialogExitPressed() {
+    controller->exitButtonPressed();
+}
+
+void View::firstTimeDialog() {
+    askForNewConnection();
+}
+
+void View::foundListDoubleClicked(QModelIndex listItem) {
+    QString attrName = listItem.data().toString();
+    QString queryPart = " a=''";
+    queryPart.insert(queryPart.size() - 1, attrName);
+    ui->lineEdit_query->setText(ui->lineEdit_query->text() + queryPart);
+}
+
+void View::resultTableRowDoubleClicked(QModelIndex tableItem) {
+    QString fileName = tableItem.data().toString();
+    controller->resultDoubleClicked(fileName);
 }

@@ -48,7 +48,6 @@ QStringList HashDictionary::traverseDictionary(QString s) {
     for (it; it != mainDict->end(); it++) {
         if (it.key() == '\\0') {
             list.append(s);
-            //qDebug() << s;
         } else {
             QString ss = s + it.key();
             list = list + it.value()->traverseDictionary(ss);

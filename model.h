@@ -4,7 +4,9 @@
 #include <qhash.h>
 #include <QtSql>
 #include <hashdictionary.h>
-#include <ui_mainwindow.h>
+#include <avu.h>
+
+class Controller;
 
 class Model : public QObject
 {
@@ -19,22 +21,21 @@ public:
         return instance;
     }
 
+    static void setController(Controller* _c) {
+        //c = _c;
+    }
 
     bool connectToDb(QString& hostName, QString& dbName, QString& username, QString& password);
     void disconnect();
-    void runQuery(QSqlQuery& q, QString& queryString);
     void readAllAttributes();
+    void runQuery(QSqlQuery& q, QString& queryString);
+    QList<AVU> getFileAttributes(QString fileName);
 
-    void findAttributes(QString attrNamePart);
-    void runUserQuery(QString userQuery);
+    QStringList findAttributes(QString attrNamePart);
+    QSqlQuery runUserQuery(QString userQuery);
 
     QSqlError getLastError();
     QString getDbName();
-
-signals:
-
-    void searchCompleted(QSqlQuery);
-    void foundAttributes(QStringList);
 
 private:
     /* Singleton constructors, instance */
@@ -42,6 +43,7 @@ private:
     Model(Model const&){}
     Model& operator=(Model const&){}
     static Model* instance;
+    static Controller* c;
 
     QSqlDatabase db;
 

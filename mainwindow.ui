@@ -25,7 +25,7 @@
      <rect>
       <x>20</x>
       <y>50</y>
-      <width>151</width>
+      <width>161</width>
       <height>241</height>
      </rect>
     </property>
@@ -37,7 +37,7 @@
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>131</width>
+       <width>141</width>
        <height>21</height>
       </rect>
      </property>
@@ -53,7 +53,7 @@
       <rect>
        <x>10</x>
        <y>50</y>
-       <width>131</width>
+       <width>141</width>
        <height>181</height>
       </rect>
      </property>
@@ -63,135 +63,6 @@
      <property name="frameShadow">
       <enum>QFrame::Plain</enum>
      </property>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="group_selectedAttr">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>210</x>
-      <y>50</y>
-      <width>161</width>
-      <height>241</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Selected attributes</string>
-    </property>
-    <widget class="QListWidget" name="list_selectedAttr">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>141</width>
-       <height>211</height>
-      </rect>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="group_setVal">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>300</y>
-      <width>351</width>
-      <height>251</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>11</pointsize>
-      <stylestrategy>PreferAntialias</stylestrategy>
-     </font>
-    </property>
-    <property name="title">
-     <string>Select value for attribute &lt;attrName&gt;</string>
-    </property>
-    <widget class="QFrame" name="frame_setValue">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>331</width>
-       <height>221</height>
-      </rect>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-     <widget class="Line" name="line">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>170</y>
-        <width>141</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-     <widget class="Line" name="line_2">
-      <property name="geometry">
-       <rect>
-        <x>200</x>
-        <y>170</y>
-        <width>131</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label">
-      <property name="geometry">
-       <rect>
-        <x>160</x>
-        <y>170</y>
-        <width>21</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>or</string>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="lineEdit_enterVal">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>190</y>
-        <width>201</width>
-        <height>27</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="lineEdit_enterUnit">
-      <property name="geometry">
-       <rect>
-        <x>210</x>
-        <y>190</y>
-        <width>121</width>
-        <height>27</height>
-       </rect>
-      </property>
-     </widget>
     </widget>
    </widget>
    <widget class="QLineEdit" name="lineEdit_query">
@@ -305,6 +176,114 @@
      <string>Disconnect</string>
     </property>
    </widget>
+   <widget class="QTableWidget" name="table_attributes">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>321</y>
+      <width>361</width>
+      <height>231</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="group_fileAttributes">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>300</y>
+      <width>361</width>
+      <height>251</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>File attributes</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="group_setValue">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>50</y>
+      <width>171</width>
+      <height>241</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Set value and unit</string>
+    </property>
+    <widget class="QLineEdit" name="lineEdit_value">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>141</width>
+       <height>31</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_unit">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>120</y>
+       <width>141</width>
+       <height>31</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_value">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>67</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Value</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_unit">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>100</y>
+       <width>67</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Unit</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="button_acceptValue">
+     <property name="geometry">
+      <rect>
+       <x>8</x>
+       <y>200</y>
+       <width>151</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Accept</string>
+     </property>
+    </widget>
+   </widget>
+   <zorder>group_findAttr</zorder>
+   <zorder>lineEdit_query</zorder>
+   <zorder>button_search</zorder>
+   <zorder>label_connection</zorder>
+   <zorder>table_results</zorder>
+   <zorder>label_queryMessage</zorder>
+   <zorder>button_disconnect</zorder>
+   <zorder>group_fileAttributes</zorder>
+   <zorder>table_attributes</zorder>
+   <zorder>group_setValue</zorder>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

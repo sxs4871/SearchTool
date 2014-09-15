@@ -14,6 +14,7 @@ public:
     QStringList findWords(QString s);
     QStringList traverseDictionary(QString s);
     QString GetRandomString();
+
 private:
     QHash<QChar, HashDictionary*>* mainDict;
 };
