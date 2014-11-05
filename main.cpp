@@ -24,17 +24,33 @@ int main(int argc, char *argv[])
     Controller* c = new Controller(view);
     w.ui = view->getUI();
 
-    w.show();
+    //w.show();
 
     /* TEST SECTION */
-    QRegularExpression ex("\\[.*?\\]");
-    QString str("[abc] and [def]");
-    QStringList res = ex.match(str).capturedTexts();
+//    QRegularExpression operators(" [=><] | >= | <= ");
+//    QString s("a >= 5");
+//    qDebug() << operators.match(s).hasMatch();
+//    qDebug() << operators.match(s).capturedTexts();
 
-    QRegExp rx("\\[.*?\\]");
-    rx.setMinimal(true);
+//    QRegularExpression e("\\((?>[^()]|(?R))*\\)");
+//    QString ss("1 + (((abc)+4) + (9 - 5))");
+//    qDebug() << e.match(ss).hasMatch();
+//    qDebug() << e.match(ss).capturedTexts();
 
-    rx.capturedTexts();
+//    QString nonEscape("(?<!\\\\)");
+//    QRegularExpression e("\\s+" + nonEscape + "(AND|OR|\\|{2}|\\&{2})\\s+");
+//    QString s("a=5 OR v>7");
+//    qDebug() << s.split(e);
+
+    try {
+        UserQuery q("3 + (((a > b) && e) AND (c = d)");
+        q.toSQL();
+    } catch (QueryFormatException e) {
+        qDebug() << e.getErrorMessage();
+    }
+
+    /***************/
+
 
     QTimer::singleShot(1, view, SLOT(firstTimeDialog()));
 

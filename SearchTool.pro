@@ -12,6 +12,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = SearchTool
 TEMPLATE = app
 
+CONFIG += C++11
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -21,7 +22,8 @@ SOURCES += main.cpp\
     userquery.cpp \
     hashdictionary.cpp \
     connectiondialog.cpp \
-    avu.cpp
+    avu.cpp \
+    queryformatexception.cpp
 
 HEADERS  += mainwindow.h \
     view.h \
@@ -30,7 +32,8 @@ HEADERS  += mainwindow.h \
     userquery.h \
     hashdictionary.h \
     connectiondialog.h \
-    avu.h
+    avu.h \
+    queryformatexception.h
 
 FORMS    += mainwindow.ui \
     connectiondialog.ui
