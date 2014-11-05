@@ -58,6 +58,7 @@ QString UserQuery::toSQL() {
 
 QString UserQuery::getParenthesizedExpr(QString fullExpr, int index) {
     QString matchedText;
+    /* This expression finds first occurence of correctly balanced parentheses */
     QRegularExpression balancedParentheses("\\((?>[^()]|(?R))*\\)");
     QRegularExpressionMatch match = balancedParentheses.match(fullExpr, index);
     if (match.hasMatch()) {
@@ -66,9 +67,85 @@ QString UserQuery::getParenthesizedExpr(QString fullExpr, int index) {
     return matchedText;
 }
 
-QString UserQuery::transformSingleExpr(QString expr) {
+QString UserQuery::transformSimpleExpr(QString expr) {
+    QueryFormatException wrongFormatException("Invalid query: " + expr);
+    QString nonEscape("(?<!\\\\)");
+    /* Finds =,>,<,>=,<=,exists keys that aren't preceeded by '\' symbol */
+    QRegularExpression operatorMatch(nonEscape + "=|[><](=)?|exists");
+    bool exactlyOneOperator = true;
+    int beginning, end;
+    QRegularExpressionMatch match = operatorMatch.match(expr);
+    if (! match.hasMatch()) {
+        exactlyOneOperator = false;
+    } else {
+        qDebug() << "First match: " << match.captured();
+        beginning = match.capturedStart();
+        end = match.capturedEnd();
+        match = operatorMatch.match(expr, end);
+        if (match.hasMatch()) {
+            qDebug() << "Second match: " << match.captured();
+            exactlyOneOperator = false;
+        }
+    }
+    if (! exactlyOneOperator) {
+        throw wrongFormatException;
+    }
+    QString op = expr.mid(beginning, end - beginning);
+    // At this point, we have split expression into right, left and the operator itself
+    // Now, need to parse left and right sides
+    QStringList parts = expr.split(op);
+    qDebug() << parts;
+    assert(parts.size() == 2);
+    QString leftSide = parts[0];
+    QString rightSide = parts[1];
+    bool validFormat = false;
+    int unitIndex = -1;
+    QString attrName, value, units;
+    /*  If operators is 'exists', then it should only have
+        right side arguments.
+        Else, look for [units] at the end of the right side
+        and split right side into value and units */
+    if (op == "exists") {
+        /* This expression represents whitespace or empty string */
+        QRegularExpression whitespace("^(\\s+)?$");
+        if (whitespace.match(leftSide).hasMatch()) {
+            attrName = rightSide;
+            validFormat = true;
+        }
+    } else {
+        attrName = leftSide;
+        /* This expression finds first occurence of correctly balanced brackets */
+        QRegularExpression balancedBrackets("\\[(?>[^\\[\\]]|(?R))*\\]");
+        QRegularExpressionMatch unitsMatch = balancedBrackets.match(rightSide);
+        if (unitsMatch.hasMatch()) {
+            qDebug() << unitsMatch.capturedTexts();
+            QString trailingText = rightSide.mid(unitsMatch.capturedEnd());
+            /* This expression represents whitespace or empty string */
+            QRegularExpression whiteSpace("^(\\s+)?$");
+            if (whiteSpace.match(trailingText).hasMatch()) {
+                validFormat = true;
+                unitIndex = unitsMatch.capturedStart();
+                value = rightSide.mid(0, unitIndex);
+                QString bracketedUnits = unitsMatch.capturedTexts().at(0);
+                units = bracketedUnits.mid(1, bracketedUnits.size() - 2);
+            }
+        } else {
+            value = rightSide;
+            validFormat = true;
+        }
+    }
+    // Here, parsing is done, if format is invalid, throw format exceptions
+    if (! validFormat) {
+        throw wrongFormatException;
+    }
+    qDebug() << "Attribute name: " << attrName;
+    qDebug() << "Value: " << value;
+    qDebug() << "Units: " << units;
+
     return expr;
 }
+
+
 
 QStringList UserQuery::getExprParts(QString expr) {
     // [0 = operator, 1 = name, 2 = value, 3 = unit]

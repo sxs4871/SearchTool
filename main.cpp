@@ -32,19 +32,10 @@ int main(int argc, char *argv[])
 //    qDebug() << operators.match(s).hasMatch();
 //    qDebug() << operators.match(s).capturedTexts();
 
-//    QRegularExpression e("\\((?>[^()]|(?R))*\\)");
-//    QString ss("1 + (((abc)+4) + (9 - 5))");
-//    qDebug() << e.match(ss).hasMatch();
-//    qDebug() << e.match(ss).capturedTexts();
-
-//    QString nonEscape("(?<!\\\\)");
-//    QRegularExpression e("\\s+" + nonEscape + "(AND|OR|\\|{2}|\\&{2})\\s+");
-//    QString s("a=5 OR v>7");
-//    qDebug() << s.split(e);
-
     try {
-        UserQuery q("3 + (((a > b) && e) AND (c = d)");
-        q.toSQL();
+        UserQuery q("a >= 5");
+        QString s("distance = 10 [miles]");
+        q.transformSimpleExpr(s);
     } catch (QueryFormatException e) {
         qDebug() << e.getErrorMessage();
     }
