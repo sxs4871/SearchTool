@@ -12,6 +12,8 @@ public:
     // methods
     UserQuery(QString _userQuery);
     QString toSQL();
+    QString transformQuery(QString query);
+    QString transformUnparenthesizedExpr(QString expr);
     QString transformSimpleExpr(QString expr);
     QStringList getExprParts(QString expr);
     QStringList splitExpression(QString fullExpr);
@@ -20,8 +22,6 @@ public:
 private:
     // fields
     QString queryString;
-    QStringList* operators;
-    QStringList* connectors;
 
     // methods
 

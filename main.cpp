@@ -27,18 +27,11 @@ int main(int argc, char *argv[])
     //w.show();
 
     /* TEST SECTION */
-//    QRegularExpression operators(" [=><] | >= | <= ");
-//    QString s("a >= 5");
-//    qDebug() << operators.match(s).hasMatch();
-//    qDebug() << operators.match(s).capturedTexts();
 
-    try {
-        UserQuery q("a >= 5");
-        QString s("distance = 10 [miles]");
-        q.transformSimpleExpr(s);
-    } catch (QueryFormatException e) {
-        qDebug() << e.getErrorMessage();
-    }
+    UserQuery q("");
+    QString s("AND a AND(b AND c)OR(d AND e)ANDd");
+    q.transformQuery(s);
+
 
     /***************/
 
