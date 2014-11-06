@@ -13,12 +13,14 @@ public:
     UserQuery(QString _userQuery);
     QString toSQL();
     QString transformQuery(QString query);
-    QString transformUnparenthesizedExpr(QString expr);
     QString transformSimpleExpr(QString expr);
-    QStringList getExprParts(QString expr);
-    QStringList splitExpression(QString fullExpr);
+    bool isParenthesized(QString);
+    QString getInnerExpression(QString parenthesizedExpr);
+    QString formatWhitespace(QString expr);
+    QString generateSQLCondition(QString attribute, QString value, QString units);
     QString getParenthesizedExpr(QString fullExpr, int index);
 
+    QString transformUnparenthesizedExpr(QString expr);
 private:
     // fields
     QString queryString;

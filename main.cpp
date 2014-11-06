@@ -29,7 +29,8 @@ int main(int argc, char *argv[])
     /* TEST SECTION */
 
     UserQuery q("");
-    QString s("AND a AND(b AND c)OR(d AND e)ANDd");
+    QString s("distance = 10 OR size = big");
+
     q.transformQuery(s);
 
 

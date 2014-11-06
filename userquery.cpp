@@ -22,6 +22,7 @@ UserQuery::UserQuery(QString _queryString) {
  */
 QString UserQuery::toSQL() {
     QString condition = queryString;
+    condition = formatWhitespace(condition);
     QString sqlCondition(condition);
     QString sqlQuery = QString("SELECT DISTINCT d.data_name, d.resc_group_name, d.modify_ts \
             FROM r_data_main d, r_meta_main m, r_objt_metamap om \
@@ -30,9 +31,13 @@ QString UserQuery::toSQL() {
 }
 
 QString UserQuery::transformQuery(QString query) {
-    QString sqlCondition;
+    qDebug() << "______________________________";
+    qDebug() << "Evaluating '" + query + "'";
     QStringList connectors, parts;
+    /* Corresponds to a properly balanced parenthesized text */
     QRegularExpression balancedParentheses("\\((?>[^()]|(?R))*\\)");
+    /* Corresponds to 'AND' or 'OR' that is preceeded by space, closing parentheses or start of line,
+     * and followed by another space, opening parentheses or end of line */
     QRegularExpression findConnectors("(^|(?<=[\\s)]))(AND|OR)($|(?=[\\s(]))");
 
     int prevGroupEnd = 0, nextGroupStart = query.size(), lastConnectorEnd = 0;
@@ -42,93 +47,76 @@ QString UserQuery::transformQuery(QString query) {
     }
     QRegularExpressionMatch connectorMatch = findConnectors.match(query);
     while (connectorMatch.hasMatch()) {
-        qDebug() << "ConnectorMatch: " << connectorMatch.captured();
-        qDebug() << "GroupMatch: " << groupMatch.captured();
+        while (! (nextGroupStart >= connectorMatch.capturedEnd())) {
+            prevGroupEnd = groupMatch.capturedEnd();
+            groupMatch = balancedParentheses.match(query, prevGroupEnd);
+            if (groupMatch.hasMatch()) {
+                nextGroupStart = groupMatch.capturedStart();
+            } else {
+                nextGroupStart = query.size();
+            }
+        }
         if ( (connectorMatch.capturedEnd() >= prevGroupEnd)
              && (connectorMatch.capturedEnd() <= nextGroupStart) ) {
             QString connector(connectorMatch.captured());
             QString leftPart = query.mid(lastConnectorEnd, connectorMatch.capturedStart() - lastConnectorEnd);
             connectors << connector;
             parts << leftPart;
-            lastConnectorEnd = connectorMatch.capturedEnd();
-        } else {
-            while (! (nextGroupStart >= connectorMatch.capturedEnd())) {
-                prevGroupEnd = groupMatch.capturedEnd();
-                groupMatch = balancedParentheses.match(query, prevGroupEnd);
-                if (groupMatch.hasMatch()) {
-                    nextGroupStart = groupMatch.capturedStart();
-                } else {
-                    nextGroupStart = query.size();
-                }
-            }
+            lastConnectorEnd = connectorMatch.capturedEnd(); 
         }
         connectorMatch = findConnectors.match(query, connectorMatch.capturedEnd());
     }
     QString remainder = query.mid(lastConnectorEnd);
     parts << remainder;
+
     qDebug() << "Parts: " << parts;
     qDebug() << "Connectors: " << connectors;
+    assert (parts.size() != 0);
+    assert (parts.size() == connectors.size() + 1);
 
+    QString sqlCondition;
+    if (connectors.size() == 0) {
+        try {
+            sqlCondition += transformSimpleExpr(parts[0]);
+        } catch (QueryFormatException e) {
+            qDebug() << e.getErrorMessage();
+        }
+    } else {
+        try {
+            for (int i = 0; i < connectors.size(); i++) {
+                QString nextPartSQL = transformSimpleExpr(parts[i]);
+                QString nextConnector = connectors[i];
+                sqlCondition += QString("%1 %2 ").arg(nextPartSQL, nextConnector);
+            }
+            sqlCondition += transformSimpleExpr(parts.last());
+        } catch (QueryFormatException e) {
+            qDebug() << e.getErrorMessage();
+        }
+        sqlCondition = QString("(%1)").arg(sqlCondition);
+    }
+
+
+    qDebug() << "Full SQL Condition: " + sqlCondition;
     return sqlCondition;
 
-//    bool hasParentheses = true;
-//    int index = 0;
-//    while (hasParentheses) {
-//        QRegularExpressionMatch match = balancedParentheses.match(query, index);
-//        if ( match.hasMatch()) {
-//            int firstParenthesisIndex = query.indexOf("(", index);
-//            if (match.capturedStart() != firstParenthesisIndex) {
-//                throw (QueryFormatException("Unclosed parenthesis at index " + QString::number(firstParenthesisIndex)));
-//            } else {
-//                QString parenthesizedExpr = match.captured();
-//                qDebug() << "Found parenthesized expr: " + parenthesizedExpr;
-//                index = match.capturedEnd();
-//            }
-//        } else {
-//            hasParentheses = false;
-//        }
-//    }
-//    int closingIndex = query.indexOf(")", index);
-//    if (closingIndex != -1) {
-//        throw (QueryFormatException("Unmatched closing parenthesis at index: " + QString(closingIndex)));
-//    }
 }
 
-QString UserQuery::transformUnparenthesizedExpr(QString expr) {
-    /* since expr can't have parentheses by contract, we don't have to worry
-     * about parentheses before or after logical connector, therefore connectors
-     * are going to be surrounded by whitespace to stand out */
-    QRegularExpression findConnectors("\\s+(AND|OR)\\s+");
-    QStringList connectors, parts;
-    QRegularExpressionMatch match = findConnectors.match(expr);
-    int prevEnd = 0;
-    while (match.hasMatch()) {
-        QString connector(match.captured());
-        QString leftPart = expr.mid(prevEnd, match.capturedStart() - prevEnd);
-        connectors << connector;
-        parts << leftPart;
-        prevEnd = match.capturedEnd();
-        match = findConnectors.match(expr, prevEnd);
-    }
-    QString remainder = expr.mid(prevEnd);
-    parts << remainder;
-    qDebug() << "Parts: " << parts;
-    qDebug() << "Connectors: " << connectors;
-    return expr;
-}
-
-QString UserQuery::getParenthesizedExpr(QString fullExpr, int index) {
-    QString matchedText;
-    /* This expression finds first occurence of correctly balanced parentheses */
-    QRegularExpression balancedParentheses("\\((?>[^()]|(?R))*\\)");
-    QRegularExpressionMatch match = balancedParentheses.match(fullExpr, index);
-    if (match.hasMatch()) {
-        matchedText = match.capturedTexts().at(0);
-    }
-    return matchedText;
-}
-
+/**
+ * @brief UserQuery::transformSimpleExpr
+ * Accepts a simple expression (not connected by logical connectors),
+ * and returns an SQL condition for it
+ * @param expr
+ * @return
+ */
 QString UserQuery::transformSimpleExpr(QString expr) {
+    qDebug() << "______________________________";
+    qDebug() << "Evaluating '" + expr + "'";
+    if (isParenthesized(expr)) {
+        QString innerExpr = getInnerExpression(expr);
+        qDebug() << "Parenthesized expression detected: " << expr;
+        qDebug() << "Inner expression is: " << innerExpr;
+        return transformQuery(innerExpr);
+    }
     QueryFormatException wrongFormatException("Invalid query: " + expr);
     QString nonEscape("(?<!\\\\)");
     /* Finds =,>,<,>=,<=,exists keys that aren't preceeded by '\' symbol */
@@ -139,12 +127,10 @@ QString UserQuery::transformSimpleExpr(QString expr) {
     if (! match.hasMatch()) {
         exactlyOneOperator = false;
     } else {
-        qDebug() << "First match: " << match.captured();
         beginning = match.capturedStart();
         end = match.capturedEnd();
         match = operatorMatch.match(expr, end);
         if (match.hasMatch()) {
-            qDebug() << "Second match: " << match.captured();
             exactlyOneOperator = false;
         }
     }
@@ -204,17 +190,84 @@ QString UserQuery::transformSimpleExpr(QString expr) {
     qDebug() << "Value: " << value;
     qDebug() << "Units: " << units;
 
+    QString sqlCondition = generateSQLCondition(attrName, value, units);
+    qDebug() << "SQL Format: " +sqlCondition;
+
+    return sqlCondition;
+}
+
+bool UserQuery::isParenthesized(QString expr) {
+    QRegularExpression parenthesizedExpr("^\\s+\\((?>[^()]|(?R))*\\)\\s+$");
+    return (parenthesizedExpr.match(expr).hasMatch());
+}
+
+QString UserQuery::getInnerExpression(QString parenthesizedExpr) {
+    QRegularExpression matchParenthesized("\\((?>[^()]|(?R))*\\)");
+    QRegularExpressionMatch match = matchParenthesized.match(parenthesizedExpr);
+    QString innerExpr;
+    if (match.hasMatch()) {
+        innerExpr = parenthesizedExpr.mid(match.capturedStart() + 1, match.capturedLength() - 2);
+    }
+    return innerExpr;
+}
+
+QString UserQuery::formatWhitespace(QString expr) {
+    QRegularExpression leadingWhiteSpace("^\\s+");
+    QRegularExpression trailingWHiteSpace("\\s+$");
+    QRegularExpression multipleWhiteSpace("\\s{2,}");
+    expr = expr.replace(leadingWhiteSpace, "");
+    expr = expr.replace(trailingWHiteSpace, "");
+    expr = expr.replace(multipleWhiteSpace, "  ");
     return expr;
 }
 
+QString UserQuery::generateSQLCondition(QString name, QString value, QString units) {
+    QString fullCondition;
+    QRegularExpression fullWhitespace("^\\s*$");
+    if (! fullWhitespace.match(name).hasMatch()) {
+        if (fullCondition.size() != 0) {
+            fullCondition += " AND ";
+        }
+        QString nameCondition = QString("m.meta_attr_name='%1'").arg(name);
+        fullCondition += nameCondition;
+    }
+    if (! fullWhitespace.match(value).hasMatch()) {
+        if (fullCondition.size() != 0) {
+            fullCondition += " AND ";
+        }
+        QString valueCondition = QString("m.meta_attr_value='%1'").arg(value);
+        fullCondition += valueCondition;
+    }
+    if (! fullWhitespace.match(units).hasMatch()) {
+        if (fullCondition.size() != 0) {
+            fullCondition += " AND ";
+        }
+        QString unitCondition = QString("m.meta_attr_unit='%1'").arg(units);
+        fullCondition += unitCondition;
+    }
+    fullCondition = QString("(%1)").arg(fullCondition);
+    return fullCondition;
+}
 
-
-QStringList UserQuery::getExprParts(QString expr) {
-    // [0 = operator, 1 = name, 2 = value, 3 = unit]
-    QStringList parts;
-
-    QRegularExpression operators(" !/= | !/> | !/< | !/>= | !/<= ");
-    qDebug() << operators.match(expr).capturedTexts();
-
-    return parts;
+QString UserQuery::transformUnparenthesizedExpr(QString expr) {
+    /* since expr can't have parentheses by contract, we don't have to worry
+     * about parentheses before or after logical connector, therefore connectors
+     * are going to be surrounded by whitespace to stand out */
+    QRegularExpression findConnectors("\\s+(AND|OR)\\s+");
+    QStringList connectors, parts;
+    QRegularExpressionMatch match = findConnectors.match(expr);
+    int prevEnd = 0;
+    while (match.hasMatch()) {
+        QString connector(match.captured());
+        QString leftPart = expr.mid(prevEnd, match.capturedStart() - prevEnd);
+        connectors << connector;
+        parts << leftPart;
+        prevEnd = match.capturedEnd();
+        match = findConnectors.match(expr, prevEnd);
+    }
+    QString remainder = expr.mid(prevEnd);
+    parts << remainder;
+    qDebug() << "Parts: " << parts;
+    qDebug() << "Connectors: " << connectors;
+    return expr;
 }
