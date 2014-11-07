@@ -1,7 +1,6 @@
 #include "view.h"
 #include <controller.h>
 #include <QDateTime>
-#include <QDebug>
 #include <QTableView>
 
 View::View(Ui::MainWindow* _ui) {
@@ -135,7 +134,6 @@ void View::showQueryFormatErrors(QStringList formatErrors) {
     foreach (QString error, formatErrors) {
         errorText += QString("%1<p></p>").arg(error);
     }
-    qDebug() << errorText;
     setSearchResultErrorText("Query contains format errors:", errorText, "red");
 }
 

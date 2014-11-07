@@ -1,11 +1,8 @@
 #include "userquery.h"
 #include <QStringList>
 #include <QStringBuilder>
-#include <QDebug>
 #include <QRegularExpression>
 #include "assert.h"
-
-
 
 UserQuery::UserQuery(QString _queryString) {
     queryString = _queryString;
@@ -24,7 +21,6 @@ QString UserQuery::toSQL() throw(QueryFormatException) {
     if (formatException.getErrorMessages().size() == 0) {
         return sqlQuery;
     } else {
-        formatException.printErrorMessages();
         throw formatException;
     }
 }
@@ -41,8 +37,6 @@ QString UserQuery::toSQL() throw(QueryFormatException) {
  * @return
  */
 QString UserQuery::transformQuery(QString query) {
-    qDebug() << "______________________________";
-    qDebug() << "Evaluating query: " + query;
     QStringList connectors, parts;
     /* Corresponds to a properly balanced parenthesized text */
     QRegularExpression balancedParentheses("\\((?>[^()]|(?R))*\\)");
@@ -81,8 +75,6 @@ QString UserQuery::transformQuery(QString query) {
     QString remainder = query.mid(lastConnectorEnd);
     parts << remainder;
 
-    qDebug() << "Parts: " << parts;
-    qDebug() << "Connectors: " << connectors;
     assert (parts.size() != 0);
     assert (parts.size() == connectors.size() + 1);
 
@@ -90,9 +82,7 @@ QString UserQuery::transformQuery(QString query) {
     if (connectors.size() == 0) {
         try {
             sqlCondition += transformGroup(parts[0]);
-        } catch (QueryFormatException e) {
-
-        }
+        } catch (QueryFormatException e) {}
     } else {
         for (int i = 0; i < connectors.size(); i++) {
             try {
@@ -106,8 +96,6 @@ QString UserQuery::transformQuery(QString query) {
         } catch (QueryFormatException e) {}
     }
 
-    qDebug() << "\n\n";
-    qDebug() << "Full SQL Condition: " + sqlCondition;
     return sqlCondition;
 }
 
@@ -119,16 +107,12 @@ QString UserQuery::transformQuery(QString query) {
  * @return
  */
 QString UserQuery::transformGroup(QString group) throw(QueryFormatException) {
-    qDebug() << "\n______________________________";
-    qDebug() << "Evaluating group: " + group;
     group = formatWhitespace(group);
     if (isParenthesizedGroup(group)) {
         QString innerExpr = getInnerExpression(group);
-        qDebug() << "Parenthesized expression detected: " << group;
-        qDebug() << "Inner expression is: " << innerExpr;
         return transformQuery(innerExpr);
     }
-    QString invalidGroupMessage = QString("Invalid group '%1'").arg(group);
+    QString invalidGroupMessage = QString("Invalid subquery   '%1'").arg(group);
     QString nonEscape("(?<!\\\\)");
     /* Finds =,>,<,>=,<=,exists keys that aren't preceeded by '\' symbol */
     QRegularExpression operatorMatch(nonEscape + "=|[><](=)?|exists");
@@ -154,7 +138,6 @@ QString UserQuery::transformGroup(QString group) throw(QueryFormatException) {
     // At this point, we have split expression into right, left and the operator itself
     // Now, need to parse left and right sides
     QStringList parts = group.split(op);
-    qDebug() << parts;
     assert(parts.size() == 2);
     QString leftSide = parts[0];
     QString rightSide = parts[1];
@@ -200,15 +183,23 @@ QString UserQuery::transformGroup(QString group) throw(QueryFormatException) {
     }
 
     QString sqlCondition = generateSQLCondition(attrName, value, units);
-    qDebug() << "SQL Condition: " + sqlCondition;
-    qDebug() << "______________________";
-
     return sqlCondition;
 }
 
 bool UserQuery::isParenthesizedGroup(QString group) {
-    QRegularExpression parenthesizedExpr("^\\s+\\((?>[^()]|(?R))*\\)\\s+$");
-    return (parenthesizedExpr.match(group).hasMatch());
+    QRegularExpression balancedParenthes("\\((?>[^()]|(?R))*\\)");
+    QRegularExpression emptiness("^\\s*$");
+    QRegularExpressionMatch match = balancedParenthes.match(group);
+    bool groupIsParenthesized = false;
+    if (match.hasMatch()) {
+        QString before = group.mid(0, match.capturedStart());
+        QString after = group.mid(match.capturedEnd());
+        if (emptiness.match(before).hasMatch()
+                && emptiness.match(after).hasMatch()) {
+            groupIsParenthesized = true;
+        }
+    }
+    return groupIsParenthesized;
 }
 
 QString UserQuery::getInnerExpression(QString parenthesizedGroup) {
