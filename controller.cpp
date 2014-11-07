@@ -18,8 +18,12 @@ bool Controller::connectModelToDb(QString host, QString dbName, QString username
 }
 
 void Controller::searchButtonClicked(QString userQuery) {
-    QSqlQuery result = model->runUserQuery(userQuery);
-    view->updateSearchResults(result);
+    try {
+        QSqlQuery result = model->runUserQuery(userQuery);
+        view->updateSearchResults(result);
+    } catch (QueryFormatException e) {
+        view->showQueryFormatErrors(e.getErrorMessages());
+    }
 }
 
 void Controller::attributeSearchUpdated(QString userQuery) {

@@ -24,16 +24,9 @@ int main(int argc, char *argv[])
     Controller* c = new Controller(view);
     w.ui = view->getUI();
 
-    //w.show();
+    w.show();
 
     /* TEST SECTION */
-
-    UserQuery q("");
-    QString s("distance = 10 OR size = big");
-
-    q.transformQuery(s);
-
-
     /***************/
 
 

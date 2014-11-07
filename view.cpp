@@ -102,17 +102,13 @@ void View::updateSearchResults(QSqlQuery result) {
     ui->table_results->setRowCount(0);
     bool ok = result.isActive();
     if (!ok) {
-        ui->label_queryMessage->setText("<font color=\"red\">Query error:</font><p></p>" + result.lastError().databaseText());
-        ui->label_queryMessage->adjustSize();
-        ui->label_queryMessage->setHidden(false);
+        setSearchResultErrorText("Query database error:", result.lastError().databaseText(), "red");
         return;
     }
 
     int resultCount = result.size();
     if (resultCount == 0) {
-        ui->label_queryMessage->setText("<font color=\"orange\">No results found</font><p></p>");
-        ui->label_queryMessage->adjustSize();
-        ui->label_queryMessage->setHidden(false);
+        setSearchResultErrorText("No results found", "", "orange");
         return;
     }
     ui->label_queryMessage->setHidden(true);
@@ -132,6 +128,23 @@ void View::updateSearchResults(QSqlQuery result) {
         }
         lastRow++;
     }
+}
+
+void View::showQueryFormatErrors(QStringList formatErrors) {
+    QString errorText;
+    foreach (QString error, formatErrors) {
+        errorText += QString("%1<p></p>").arg(error);
+    }
+    qDebug() << errorText;
+    setSearchResultErrorText("Query contains format errors:", errorText, "red");
+}
+
+void View::setSearchResultErrorText(QString header, QString error, QString color) {
+    QString coloredText = QString("<font color=\"%1\">%2</font><p></p>%3").arg(color, header, error);
+    ui->label_queryMessage->setText(coloredText);
+    ui->label_queryMessage->adjustSize();
+    ui->label_queryMessage->setHidden(false);
+    return;
 }
 
 void View::updateFoundAttributes(QStringList attributes) {
@@ -192,7 +205,8 @@ void View::quit() {
 
 void View::searchButtonClicked() {
     QString userQuery = ui->lineEdit_query->text();
-    if (userQuery == "") {
+    QRegularExpression empty("^\\s*$");
+    if (empty.match(userQuery).hasMatch()) {
         return;
     }
     controller->searchButtonClicked(userQuery);
@@ -221,9 +235,8 @@ void View::firstTimeDialog() {
 
 void View::foundListDoubleClicked(QModelIndex listItem) {
     QString attrName = listItem.data().toString();
-    QString queryPart = " a=''";
-    queryPart.insert(queryPart.size() - 1, attrName);
-    ui->lineEdit_query->setText(ui->lineEdit_query->text() + queryPart);
+    QString attributeQuery = QString("exists %1").arg(attrName);
+    ui->lineEdit_query->setText(ui->lineEdit_query->text() + attributeQuery);
 }
 
 void View::resultTableRowDoubleClicked(QModelIndex tableItem) {

@@ -5,6 +5,7 @@
 #include <QtSql>
 #include <hashdictionary.h>
 #include <avu.h>
+#include <queryformatexception.h>
 
 class Controller;
 
@@ -32,7 +33,7 @@ public:
     QList<AVU> getFileAttributes(QString fileName);
 
     QStringList findAttributes(QString attrNamePart);
-    QSqlQuery runUserQuery(QString userQuery);
+    QSqlQuery runUserQuery(QString userQuery) throw(QueryFormatException);
 
     QSqlError getLastError();
     QString getDbName();

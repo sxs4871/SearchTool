@@ -24,11 +24,10 @@ void Model::runQuery(QSqlQuery & q, QString& queryString) {
     q.exec(queryString);
 }
 
-QSqlQuery Model::runUserQuery(QString userQuery) {
+QSqlQuery Model::runUserQuery(QString userQuery) throw(QueryFormatException){
     UserQuery uq(userQuery);
     QSqlQuery query;
     QString queryString = uq.toSQL();
-    qDebug() << queryString;
     runQuery(query, queryString);
     return query;
 }

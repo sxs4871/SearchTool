@@ -3,16 +3,21 @@
 
 #include <exception>
 #include <QString>
+#include <QStringList>
 
 class QueryFormatException : public std::exception {
 
 public:
+    QueryFormatException();
     QueryFormatException(QString errMessage);
     ~QueryFormatException() throw();
-    QString getErrorMessage();
+    void addError(QString errorDescription);
+
+    QStringList getErrorMessages();
+    void printErrorMessages();
 
 private:
-    QString errorMessage;
+    QStringList queryErrors;
 };
 
 #endif // QUERYFORMATEXCEPTION_H

@@ -25,6 +25,8 @@ public:
     void showConnectionDialog();
 
     void updateSearchResults(QSqlQuery);
+    void showQueryFormatErrors(QStringList formatErrors);
+    void setSearchResultErrorText(QString header, QString error, QString color);
     void updateFoundAttributes(QStringList);
     void showFileAttributes(QList<AVU>, QString);
 

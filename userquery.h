@@ -11,20 +11,19 @@ class UserQuery
 public:
     // methods
     UserQuery(QString _userQuery);
-    QString toSQL();
+    QString toSQL() throw(QueryFormatException);
     QString transformQuery(QString query);
-    QString transformSimpleExpr(QString expr);
-    bool isParenthesized(QString);
-    QString getInnerExpression(QString parenthesizedExpr);
+    QString transformGroup(QString group) throw(QueryFormatException);
+    bool isParenthesizedGroup(QString group);
+    QString getInnerExpression(QString parenthesizedGroup);
     QString formatWhitespace(QString expr);
+    QString removePaddingWhitespace(QString expr);
     QString generateSQLCondition(QString attribute, QString value, QString units);
-    QString getParenthesizedExpr(QString fullExpr, int index);
 
-    QString transformUnparenthesizedExpr(QString expr);
 private:
     // fields
     QString queryString;
-
+    QueryFormatException formatException;
     // methods
 
 
