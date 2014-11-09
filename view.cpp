@@ -158,9 +158,9 @@ void View::showFileAttributes(QList<AVU> avus, QString fileName) {
     for (int i = 0; i < tableSize; i++) {
         AVU curAVU = avus.at(i);
         ui->table_attributes->insertRow(ui->table_attributes->rowCount());
-        ui->table_attributes->setItem(i, 0, new QTableWidgetItem(curAVU[0]));
-        ui->table_attributes->setItem(i, 1, new QTableWidgetItem(curAVU[1]));
-        ui->table_attributes->setItem(i, 2, new QTableWidgetItem(curAVU[2]));
+        ui->table_attributes->setItem(i, 0, new QTableWidgetItem(curAVU.getAttrName()));
+        ui->table_attributes->setItem(i, 1, new QTableWidgetItem(curAVU.getValue()));
+        ui->table_attributes->setItem(i, 2, new QTableWidgetItem(curAVU.getUnit()));
     }
 }
 
