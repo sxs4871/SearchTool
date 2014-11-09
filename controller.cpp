@@ -2,12 +2,14 @@
 #include "view.h"
 #include "model.h"
 
-Controller::Controller(View* _view) {
+Controller::Controller() {
     model = Model::getInstance();
-    view = _view;
-    view->setController(this);
-    Model::setController(this);
 }
+
+void Controller::setView(View* _view) {
+    view = _view;
+}
+
 
 bool Controller::connectModelToDb(QString host, QString dbName, QString username, QString password) {
     bool connected = model->connectToDb(host, dbName, username, password);

@@ -23,7 +23,7 @@ public:
     }
 
     static void setController(Controller* _c) {
-        //c = _c;
+        controller = _c;
     }
 
     bool connectToDb(QString& hostName, QString& dbName, QString& username, QString& password);
@@ -40,11 +40,14 @@ public:
 
 private:
     /* Singleton constructors, instance */
-    Model(){}
-    Model(Model const&){}
-    Model& operator=(Model const&){}
+    Model() : QObject() {}
+    Model(Model const&) : QObject() {}
+    Model& operator=(Model const&) {
+        return *this;
+    }
+
     static Model* instance;
-    static Controller* c;
+    static Controller* controller;
 
     QSqlDatabase db;
 

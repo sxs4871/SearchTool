@@ -9,7 +9,8 @@ class Model;
 class Controller
 {
 public:
-    Controller(View*);
+    Controller();
+    void setView(View* _view);
 
     void searchButtonClicked(QString userQuery);
     void attributeSearchUpdated(QString);

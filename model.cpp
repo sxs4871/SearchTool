@@ -4,6 +4,7 @@
 #include <assert.h>
 
 Model* Model::instance = NULL;
+Controller* Model::controller = NULL;
 
 bool Model::connectToDb(QString& hostName, QString& dbName, QString& username, QString& password) {
     disconnect();

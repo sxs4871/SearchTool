@@ -20,8 +20,16 @@ int main(int argc, char *argv[])
     w.setWindowTitle("Search tool");
     w.setFixedSize(w.width(), w.height());
 
+    /* Initialize MVC elements */
+    Model* model = Model::getInstance();
     View* view = new View(w.ui);
-    Controller* c = new Controller(view);
+    Controller* controller = new Controller();
+
+    /* Hook up connections */
+    controller->setView(view);
+    view->setController(controller);
+    model->setController(controller);
+
     w.ui = view->getUI();
 
     w.show();
