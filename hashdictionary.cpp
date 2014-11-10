@@ -56,13 +56,12 @@ QStringList HashDictionary::traverseDictionary(QString s) {
     return list;
 }
 
-QString HashDictionary::GetRandomString()
+QString HashDictionary::GetRandomString(int length)
 {
    QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-   int randomStringLength = 12; // assuming you want random strings of 12 characters
 
    QString randomString;
-   for(int i=0; i<randomStringLength; ++i)
+   for(int i = 0; i < length; ++i)
    {
        int index = qrand() % possibleCharacters.length();
        QChar nextChar = possibleCharacters.at(index);

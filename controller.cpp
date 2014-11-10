@@ -6,8 +6,9 @@ Controller::Controller() {
     model = Model::getInstance();
 }
 
-void Controller::setView(View* _view) {
+void Controller::connectToView(View* _view) {
     view = _view;
+    view->setController(this);
 }
 
 

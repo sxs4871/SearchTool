@@ -4,6 +4,9 @@
 #include <QMainWindow>
 #include <ui_mainwindow.h>
 
+/**
+ * QtGenerated class for the main window
+ */
 
 namespace Ui {
 class MainWindow;

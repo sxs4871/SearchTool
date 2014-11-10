@@ -8,10 +8,6 @@ UserQuery::UserQuery(QString _queryString) {
     queryString = _queryString;
 }
 
-/**
- * @brief UserQuery::toSQL
- * @return
- */
 QString UserQuery::toSQL() throw(QueryFormatException) {
     formatException = QueryFormatException();
     QString sqlCondition = transformQuery(queryString);
@@ -25,17 +21,6 @@ QString UserQuery::toSQL() throw(QueryFormatException) {
     }
 }
 
-/**
- * @brief UserQuery::transformQuery
- * Step 1: Split query into groups (parts connected by logical operators)
- * Step 2: Transform each group individually
- *  - If group is a parenthesized expression, evaluate it in a recursive call (Step 1),
- *      else, step 3
- * Step 3: Extract attribute name, value and units from group
- * Step 4: Transform group into SQL condition
- * @param query
- * @return
- */
 QString UserQuery::transformQuery(QString query) {
     QStringList connectors, parts;
     /* Corresponds to a properly balanced parenthesized text */
@@ -99,13 +84,6 @@ QString UserQuery::transformQuery(QString query) {
     return sqlCondition;
 }
 
-/**
- * @brief UserQuery::transformSimpleExpr
- * Accepts a simple expression (not connected by logical connectors),
- * and returns an SQL condition for it
- * @param expr
- * @return
- */
 QString UserQuery::transformGroup(QString group) throw(QueryFormatException) {
     group = formatWhitespace(group);
     if (isParenthesizedGroup(group)) {

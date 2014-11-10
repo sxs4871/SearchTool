@@ -4,17 +4,12 @@
 #include <model.h>
 #include <view.h>
 #include <controller.h>
-#include <QDebug>
-#include <QtSql>
-#include <iostream>
-#include <userquery.h>
-#include <hashdictionary.h>
-#include <connectiondialog.h>
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
+    /* Create application and configure main window for it */
     QApplication a(argc, argv);
     MainWindow w;
     w.setWindowTitle("Search tool");
@@ -30,14 +25,17 @@ int main(int argc, char *argv[])
     view->setController(controller);
     model->setController(controller);
 
+    /* Set View's UI as the main window UI */
     w.ui = view->getUI();
 
+    /* Present view to the user */
     w.show();
 
     /* TEST SECTION */
     /***************/
 
-
+    /* Present connection dialog on top of the main view, since database connection
+       was not yet established */
     QTimer::singleShot(1, view, SLOT(firstTimeDialog()));
 
     return a.exec();
