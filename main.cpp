@@ -21,8 +21,7 @@ int main(int argc, char *argv[])
     Controller* controller = new Controller();
 
     /* Hook up connections */
-    controller->setView(view);
-    view->setController(controller);
+    controller->connectToView(view);
     model->setController(controller);
 
     /* Set View's UI as the main window UI */

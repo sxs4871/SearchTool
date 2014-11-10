@@ -7,7 +7,7 @@ HashDictionary::HashDictionary() {
 
 void HashDictionary::insertWord(QString& word) {
     if (word.size() == 0) {
-        mainDict->insert(QChar('\\0'), 0);
+        mainDict->insert('\0', 0);
         return;
     }
     QChar c = word.at(0);
@@ -43,10 +43,10 @@ QStringList HashDictionary::findWords(QString wordPart) {
 }
 
 QStringList HashDictionary::traverseDictionary(QString s) {
-    QHash<QChar, HashDictionary*>::iterator it = mainDict->begin();
+    QHash<QChar, HashDictionary*>::iterator it;
     QStringList list;
-    for (it; it != mainDict->end(); it++) {
-        if (it.key() == '\\0') {
+    for (it = mainDict->begin(); it != mainDict->end(); it++) {
+        if (it.key() == '\0') {
             list.append(s);
         } else {
             QString ss = s + it.key();
