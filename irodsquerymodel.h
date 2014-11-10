@@ -17,7 +17,7 @@ class Controller;
  * role of this model is retrieving data from the database
  * and submitting user's queries.
  */
-class Model : public QObject
+class iRODSQueryModel : public QObject
 {
 
     Q_OBJECT
@@ -28,9 +28,9 @@ public:
      * Model implements Singleton design pattern. Only one state of application can exist.
      * @return Singleton model
      */
-    static Model* getInstance() {
+    static iRODSQueryModel* getInstance() {
         if (!instance) {
-            instance = new Model();
+            instance = new iRODSQueryModel();
         }
         return instance;
     }
@@ -113,14 +113,14 @@ public:
 private:
     /* Constructors and assignment operator hidden to maintain
      * the Singleton pattern integrity */
-    Model() : QObject() {}
-    Model(Model const&) : QObject() {}
-    Model& operator=(Model const&) {
+    iRODSQueryModel() : QObject() {}
+    iRODSQueryModel(iRODSQueryModel const&) : QObject() {}
+    iRODSQueryModel& operator=(iRODSQueryModel const&) {
         return *this;
     }
 
     /* Instance variable of the singleton model */
-    static Model* instance;
+    static iRODSQueryModel* instance;
 
     /* Pointer to the associated controller */
     static Controller* controller;

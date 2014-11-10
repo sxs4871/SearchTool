@@ -16,14 +16,14 @@ class Controller;
  * in the main window (which are created in Forms/mainwindow.ui,
  * and is responsible for user's interaction with those elements
  */
-class View : public QMainWindow
+class PrimaryWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
     /* Constructor and destructor */
-    View(Ui::MainWindow* _ui = 0);
-    ~View();
+    PrimaryWindow(Ui::MainWindow* _ui = 0);
+    ~PrimaryWindow();
 
     /**
      * @brief getUI - Accessor to the main window

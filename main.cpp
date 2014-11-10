@@ -1,8 +1,8 @@
 #include "mainwindow.h"
 #include <QApplication>
 
-#include <model.h>
-#include <view.h>
+#include <irodsquerymodel.h>
+#include <primarywindow.h>
 #include <controller.h>
 
 using namespace std;
@@ -16,8 +16,8 @@ int main(int argc, char *argv[])
     w.setFixedSize(w.width(), w.height());
 
     /* Initialize MVC elements */
-    Model* model = Model::getInstance();
-    View* view = new View(w.ui);
+    iRODSQueryModel* model = iRODSQueryModel::getInstance();
+    PrimaryWindow* view = new PrimaryWindow(w.ui);
     Controller* controller = new Controller();
 
     /* Hook up connections */

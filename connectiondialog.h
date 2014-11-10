@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-class View;
+class PrimaryWindow;
 
 namespace Ui {
 class ConnectionDialog;
@@ -29,7 +29,7 @@ public:
      * @param parent - parent widget required by QtDialog constructor
      *                 for QDialog creation
      */
-    explicit ConnectionDialog(View* _parentView, QWidget *parent = 0);
+    explicit ConnectionDialog(PrimaryWindow* _parentView, QWidget *parent = 0);
     ~ConnectionDialog();
 
     /**
@@ -61,7 +61,7 @@ private:
     Ui::ConnectionDialog *ui;
 
     /* Reference to the View object to let it know, when this dialog can be closed */
-    View* parentView;
+    PrimaryWindow* parentView;
 };
 
 #endif // CONNECTIONDIALOG_H

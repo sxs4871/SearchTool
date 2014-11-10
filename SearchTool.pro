@@ -16,24 +16,24 @@ CONFIG += C++11
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    view.cpp \
-    model.cpp \
     controller.cpp \
     userquery.cpp \
     hashdictionary.cpp \
     connectiondialog.cpp \
     avu.cpp \
-    queryformatexception.cpp
+    queryformatexception.cpp \
+    irodsquerymodel.cpp \
+    primarywindow.cpp
 
 HEADERS  += mainwindow.h \
-    view.h \
-    model.h \
     controller.h \
     userquery.h \
     hashdictionary.h \
     connectiondialog.h \
     avu.h \
-    queryformatexception.h
+    queryformatexception.h \
+    irodsquerymodel.h \
+    primarywindow.h
 
 FORMS    += mainwindow.ui \
     connectiondialog.ui

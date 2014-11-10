@@ -5,8 +5,8 @@
 
 /* Forward declarations required to let C++ objects
  * contain pointers to each other */
-class View;
-class Model;
+class PrimaryWindow;
+class iRODSQueryModel;
 
 /**
  * @brief The Controller class
@@ -31,7 +31,7 @@ public:
      * Connection goes both ways (controller --> view and view --> controller)
      * @param _view
      */
-    void connectToView(View* _view);
+    void connectToView(PrimaryWindow* _view);
 
     /* Following methods are created to respond to certain events
        in that happen in the view */
@@ -105,8 +105,8 @@ public:
 
 private:
     /* References to model and view */
-    Model* model;
-    View* view;
+    iRODSQueryModel* model;
+    PrimaryWindow* view;
 };
 
 #endif // CONTROLLER_H

@@ -1,9 +1,9 @@
-#include "view.h"
+#include "primarywindow.h"
 #include <controller.h>
 #include <QDateTime>
 #include <QTableView>
 
-View::View(Ui::MainWindow* _ui) {
+PrimaryWindow::PrimaryWindow(Ui::MainWindow* _ui) {
     if (_ui == 0) {
         new Ui::MainWindow();
     } else {
@@ -12,9 +12,9 @@ View::View(Ui::MainWindow* _ui) {
     initView();
 }
 
-View::~View() {}
+PrimaryWindow::~PrimaryWindow() {}
 
-void View::initView() {
+void PrimaryWindow::initView() {
 
     /* GroupBox setup */
     QString groupBoxStyle("QGroupBox {font-size: 14px; font-weight: bold;border: 1px solid gray;border-radius: 5px;margin-top: 0.5em;}\
@@ -68,7 +68,7 @@ void View::initView() {
     ui->list_foundAttr->setStyleSheet("background-color: transparent;");
 }
 
-void View::setController(Controller* c) {
+void PrimaryWindow::setController(Controller* c) {
     controller = c;
     /* connecting signals and slots */
     QObject::connect(ui->lineEdit_query, SIGNAL(returnPressed()), ui->button_search, SIGNAL(clicked()));
@@ -79,15 +79,15 @@ void View::setController(Controller* c) {
     QObject::connect(ui->table_results, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(resultTableRowDoubleClicked(QModelIndex)));
 }
 
-Controller* View::getController() {
+Controller* PrimaryWindow::getController() {
     return controller;
 }
 
-Ui::MainWindow* View::getUI() {
+Ui::MainWindow* PrimaryWindow::getUI() {
     return ui;
 }
 
-void View::askForNewConnection() {
+void PrimaryWindow::askForNewConnection() {
     cd = new ConnectionDialog(this);
     cd->setFixedSize(cd->width(), cd->height());
     cd->setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowTitleHint);
@@ -97,7 +97,7 @@ void View::askForNewConnection() {
     cd = 0;
 }
 
-void View::updateSearchResults(QSqlQuery result) {
+void PrimaryWindow::updateSearchResults(QSqlQuery result) {
     ui->table_results->setRowCount(0);
     bool ok = result.isActive();
     if (!ok) {
@@ -129,7 +129,7 @@ void View::updateSearchResults(QSqlQuery result) {
     }
 }
 
-void View::showQueryFormatErrors(QStringList formatErrors) {
+void PrimaryWindow::showQueryFormatErrors(QStringList formatErrors) {
     QString errorText;
     foreach (QString error, formatErrors) {
         errorText += QString("%1<p></p>").arg(error);
@@ -137,7 +137,7 @@ void View::showQueryFormatErrors(QStringList formatErrors) {
     setSearchResultErrorText("Query contains format errors:", errorText, "red");
 }
 
-void View::setSearchResultErrorText(QString header, QString error, QString color) {
+void PrimaryWindow::setSearchResultErrorText(QString header, QString error, QString color) {
     ui->table_results->setRowCount(0);
     QString coloredText = QString("<font color=\"%1\">%2</font><p></p>%3").arg(color, header, error);
     ui->label_queryMessage->setText(coloredText);
@@ -146,12 +146,12 @@ void View::setSearchResultErrorText(QString header, QString error, QString color
     return;
 }
 
-void View::updateFoundAttributes(QStringList attributes) {
+void PrimaryWindow::updateFoundAttributes(QStringList attributes) {
     ui->list_foundAttr->clear();
     ui->list_foundAttr->addItems(attributes);
 }
 
-void View::showFileAttributes(QList<AVU> avus, QString fileName) {
+void PrimaryWindow::showFileAttributes(QList<AVU> avus, QString fileName) {
     QString title = "\"" + fileName + "\" attributes";
     ui->group_fileAttributes->setTitle(title);
     ui->table_attributes->setRowCount(0);
@@ -165,7 +165,7 @@ void View::showFileAttributes(QList<AVU> avus, QString fileName) {
     }
 }
 
-void View::displayConnection(QString dbName) {
+void PrimaryWindow::displayConnection(QString dbName) {
     this->attributeSearchUpdated("");
     QLabel* c = ui->label_connection;
     c->setText("Connected to:  \"" + dbName + "\"");
@@ -178,23 +178,23 @@ void View::displayConnection(QString dbName) {
     ui->button_disconnect->setVisible(true);
 }
 
-void View::closeConnection() {
+void PrimaryWindow::closeConnection() {
     ui->label_connection->setText("No connection  ");
     ui->label_connection->setStyleSheet("QLabel { color : orange; }");
     ui->button_disconnect->setVisible(false);
 }
 
-void View::closeDialog() {
+void PrimaryWindow::closeDialog() {
     if (cd != 0) {
         cd->accept();
     }
 }
 
-void View::setDialogConnectionError(QString errorText) {
+void PrimaryWindow::setDialogConnectionError(QString errorText) {
     cd->setConnectionError(errorText);
 }
 
-void View::quit() {
+void PrimaryWindow::quit() {
     closeDialog();
     qApp->quit();
 }
@@ -202,7 +202,7 @@ void View::quit() {
 
 /* slots */
 
-void View::searchButtonClicked() {
+void PrimaryWindow::searchButtonClicked() {
     QString userQuery = ui->lineEdit_query->text();
     QRegularExpression empty("^\\s*$");
     if (empty.match(userQuery).hasMatch()) {
@@ -211,34 +211,34 @@ void View::searchButtonClicked() {
     controller->searchButtonClicked(userQuery);
 }
 
-void View::disconnectButtonPressed() {
+void PrimaryWindow::disconnectButtonPressed() {
     controller->disconnectButtonPressed();
 }
 
-void View::attributeSearchUpdated(QString text) {
+void PrimaryWindow::attributeSearchUpdated(QString text) {
     controller->attributeSearchUpdated(text);
 }
 
-void View::dialogConnectPressed() {
+void PrimaryWindow::dialogConnectPressed() {
     QStringList connectionParams = cd->getConnectionInfo();
     controller->connectButtonPressed(connectionParams);
 }
 
-void View::dialogExitPressed() {
+void PrimaryWindow::dialogExitPressed() {
     controller->exitButtonPressed();
 }
 
-void View::firstTimeDialog() {
+void PrimaryWindow::firstTimeDialog() {
     askForNewConnection();
 }
 
-void View::foundListDoubleClicked(QModelIndex listItem) {
+void PrimaryWindow::foundListDoubleClicked(QModelIndex listItem) {
     QString attrName = listItem.data().toString();
     QString attributeQuery = QString("exists %1").arg(attrName);
     ui->lineEdit_query->setText(ui->lineEdit_query->text() + attributeQuery);
 }
 
-void View::resultTableRowDoubleClicked(QModelIndex tableItem) {
+void PrimaryWindow::resultTableRowDoubleClicked(QModelIndex tableItem) {
     QString fileName = tableItem.data().toString();
     controller->resultDoubleClicked(fileName);
 }

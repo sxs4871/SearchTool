@@ -1,12 +1,12 @@
 #include "controller.h"
-#include "view.h"
-#include "model.h"
+#include "primarywindow.h"
+#include "irodsquerymodel.h"
 
 Controller::Controller() {
-    model = Model::getInstance();
+    model = iRODSQueryModel::getInstance();
 }
 
-void Controller::connectToView(View* _view) {
+void Controller::connectToView(PrimaryWindow* _view) {
     view = _view;
     view->setController(this);
 }

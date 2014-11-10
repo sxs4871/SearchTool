@@ -1,8 +1,8 @@
 #include "connectiondialog.h"
 #include "ui_connectiondialog.h"
-#include "view.h"
+#include "primarywindow.h"
 
-ConnectionDialog::ConnectionDialog(View* _parentView, QWidget *parent) :
+ConnectionDialog::ConnectionDialog(PrimaryWindow* _parentView, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ConnectionDialog)
 {
