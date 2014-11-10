@@ -126,12 +126,17 @@ QString UserQuery::transformGroup(QString group) throw(QueryFormatException) {
         right side arguments.
         Else, look for [units] at the end of the right side
         and split right side into value and units */
-    if (op == "exists") {
+    if (op.toLower() == "exists") {
         /* This expression represents whitespace or empty string */
         QRegularExpression whitespace("^(\\s+)?$");
         if (whitespace.match(leftSide).hasMatch()) {
-            attrName = rightSide;
-            validFormat = true;
+            if (! whitespace.match(rightSide).hasMatch()) {
+                attrName = rightSide;
+                validFormat = true;
+            } else {
+                formatException.addError("'exists' operator needs to have attribute name on the right side.");
+                throw QueryFormatException();
+            }
         }
     } else {
         attrName = leftSide;
@@ -152,6 +157,14 @@ QString UserQuery::transformGroup(QString group) throw(QueryFormatException) {
         } else {
             value = rightSide;
             validFormat = true;
+        }
+    }
+    attrName = removePaddingWhitespace(attrName);
+    value = removePaddingWhitespace(value);
+    units = removePaddingWhitespace(units);
+    if (op.toLower() != "exists") {
+        if (attrName == "" || value == "") {
+            validFormat = false;
         }
     }
     // Here, parsing is done, if format is invalid, throw format exceptions
@@ -206,19 +219,18 @@ QString UserQuery::removePaddingWhitespace(QString expr) {
 }
 
 QString UserQuery::generateSQLCondition(QString name, QString value, QString units) {
-    name = removePaddingWhitespace(name);
-    value = removePaddingWhitespace(value);
-    units = removePaddingWhitespace(units);
     QString fullCondition;
     QRegularExpression fullWhitespace("^\\s*$");
-    if (! fullWhitespace.match(name).hasMatch()) {
+    if ( (! fullWhitespace.match(name).hasMatch())
+         && (name != "?") ) {
         if (fullCondition.size() != 0) {
             fullCondition += " AND ";
         }
         QString nameCondition = QString("m.meta_attr_name='%1'").arg(name);
         fullCondition += nameCondition;
     }
-    if (! fullWhitespace.match(value).hasMatch()) {
+    if ( (! fullWhitespace.match(value).hasMatch())
+         && (value != "?") ) {
         if (fullCondition.size() != 0) {
             fullCondition += " AND ";
         }

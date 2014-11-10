@@ -138,6 +138,7 @@ void View::showQueryFormatErrors(QStringList formatErrors) {
 }
 
 void View::setSearchResultErrorText(QString header, QString error, QString color) {
+    ui->table_results->setRowCount(0);
     QString coloredText = QString("<font color=\"%1\">%2</font><p></p>%3").arg(color, header, error);
     ui->label_queryMessage->setText(coloredText);
     ui->label_queryMessage->adjustSize();
