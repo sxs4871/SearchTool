@@ -47,6 +47,7 @@ public:
     /**
      * @brief connectToDb
      * Attempts to connect to a database with the given credentials.
+     * @param sqlDriver - name of the Sql driver to use
      * @param hostName - host name
      * @param dbName - database name
      * @param username - username
@@ -54,7 +55,7 @@ public:
      * @return true, if connection was successful
      *         false, otherwise
      */
-    bool connectToDb(QString& hostName, QString& dbName, QString& username, QString& password);
+    bool connectToDb(QString& sqlDriver, QString& hostName, QString& dbName, QString& username, QString& password);
 
     /**
      * @brief disconnect
@@ -69,16 +70,18 @@ public:
      */
     void readAllAttributes();
 
+    void addNewAttribute(int dataId, QString &name, QString &value, QString &units);
+
+    void editAttribute(int metaId, QString &name, QString &value, QString &units);
+
     /**
-     * @brief runQuery
-     * Runs a query to a database, using a QSqlQuery object,
-     * passed by reference. This object will contain results
-     * when query is completed.
-     * @param q - QSqlQuery object
-     * @param queryString - SQL Query text
+     * @brief getFileAttributes
+     * Obtains existing metadata for the file
+     * with the given name
+     * @param fileName - name of the file, for which metadata is requested
+     * @return - list of AVUs for the specified file
      */
-    void runQuery(QSqlQuery& q, QString& queryString);
-    QList<AVU> getFileAttributes(QString fileName);
+    QList<AVU> getFileAttributes(int fileId);
 
     /**
      * @brief findAttributes
@@ -96,6 +99,16 @@ public:
      * @return - QSqlQuery object,containing results of the query
      */
     QSqlQuery runUserQuery(QString userQuery) throw(QueryFormatException);
+
+    /**
+     * @brief runSqlQuery
+     * Runs a SQL query to a database, using a QSqlQuery object,
+     * passed by reference. This object will contain results
+     * when query is completed.
+     * @param q - QSqlQuery object
+     * @param queryString - SQL Query text
+     */
+    QSqlQuery runSqlQuery(QString& queryString);
 
     /**
      * @brief getLastError

@@ -11,7 +11,7 @@ UserQuery::UserQuery(QString _queryString) {
 QString UserQuery::toSQL() throw(QueryFormatException) {
     formatException = QueryFormatException();
     QString sqlCondition = transformQuery(queryString);
-    QString sqlQuery = QString("SELECT DISTINCT d.data_name, d.resc_group_name, d.modify_ts "
+    QString sqlQuery = QString("SELECT DISTINCT d.data_name, d.resc_group_name, d.modify_ts, d.data_id "
                                "FROM r_data_main d, r_meta_main m, r_objt_metamap om "
                                "WHERE m.meta_id=om.meta_id and d.data_id=om.object_id and (%1)").arg(sqlCondition);
     if (formatException.getErrorMessages().size() == 0) {

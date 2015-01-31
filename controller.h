@@ -70,6 +70,7 @@ public:
     /**
      * @brief connectModelToDb
      * Use information provided by the user to try to connect to the database.
+     * @param sqlDriver - name of the Sql driver to use
      * @param host - host name
      * @param dbName - database name
      * @param username - username
@@ -77,31 +78,43 @@ public:
      * @return - true, if connection was successful
      *           false, otherwise
      */
-    bool connectModelToDb(QString host, QString dbName, QString username, QString password);
+    bool connectModelToDb(QString& sqlDriver, QString& host, QString& dbName, QString& username, QString& password);
 
     /**
      * @brief connectButtonPressed - user pressed 'Connect' button in the connection dialog
-     * @param connectionParams - list of connection parameters entered by the user
-     *                           1. Host name
-     *                           2. Database name
-     *                           3. Username
-     *                           4. User password
+     * @param sqlDriver - name of the Sql driver to use
+     * @param host - host name
+     * @param dbName - database name
+     * @param username - username
+     * @param password - user password
      */
-    void connectButtonPressed(QStringList connectionParams);
+    void cdConnectButtonPressed(QString& sqlDriver, QString& host, QString& dbName, QString& username, QString& password);
 
     /**
      * @brief exitButtonPressed - user wants to quit the program. Close everything.
      */
-    void exitButtonPressed();
+    void cdExitButtonPressed();
+
+    void eadAcceptButtonPressed(int metaId, QString &name, QString &value, QString &units);
+
+    void eadCancelButtonPressed();
+
+    void attributeEditCompleted();
 
     /**
      * @brief resultDoubleClicked
      * User double-clicked some result in the results table, which means he wants more
      * information about it. Present all the metadata associated with the selected object
      * in a separate table
-     * @param fileName - name of the file that user double clicked.
+     * @param fileId - id of the file that user double clicked.
      */
-    void resultDoubleClicked(QString fileName);
+    void resultDoubleClicked(int fileId, QString fileName);
+
+    /**
+     * @brief removeAttributes - removes metadata entries from irods with given meta ids
+     * @param idsToRemove - list of meta ids to remove from irods
+     */
+    void removeAttributes(QList<int> idsToRemove);
 
 private:
     /* References to model and view */

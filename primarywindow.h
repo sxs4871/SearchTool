@@ -6,6 +6,7 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include "connectiondialog.h"
+#include "editattributedialog.h"
 #include <avu.h>
 
 class Controller;
@@ -51,6 +52,16 @@ public:
     void askForNewConnection();
 
     /**
+     * @brief editAttribute
+     */
+    void editAttribute();
+
+    /**
+     * @brief addNewAttribute
+     */
+    void addNewAttribute();
+
+    /**
      * @brief updateSearchResults
      * Displays results of the query in the table of results
      * @param resultQuery - QSqlQuery object with results of the query
@@ -81,13 +92,23 @@ public:
      */
     void updateFoundAttributes(QStringList attrNames);
 
+    void refreshFoundAttributes();
+
     /**
      * @brief showFileAttributes - displays in a table what meta data
      * specific file has.
      * @param avus - all the AVU triplets associated with the file
      * @param fileName - name of the file
      */
-    void showFileAttributes(QList<AVU> avus, QString fileName);
+    void showFileAttributes(QList<AVU> avus, QString fileName, int fileId);
+
+    /**
+     * @brief removeAttributeFromTable
+     * Removes a metadata item with a given id from the table of attributes
+     * for the currently selected file
+     * @param metaId - id of the meta attribute to remove
+     */
+    void removeAttributeFromTable(int metaId);
 
     /**
      * @brief displayConnection - sets a label at the bottom of the screen
@@ -103,9 +124,14 @@ public:
     void closeConnection();
 
     /**
-     * @brief closeDialog - removes the connection dialog
+     * @brief closeConnectionDialog - removes the connection dialog
      */
-    void closeDialog();
+    void closeConnectionDialog();
+
+    /**
+     * @brief closeEditAttrDialog - removes the edit attribute dialog
+     */
+    void closeEditAttrDialog();
 
     /**
      * @brief setDialogConnectionError - displays an error in the dialog
@@ -120,6 +146,16 @@ public:
      */
     void quit();
 
+    /**
+     * @brief getMetaIdForRow
+     * @param row - selected row of the 'attributes' table
+     * @return id of this meta AVU triplet in the database
+     */
+    int getMetaIdForRow(int row);
+
+    int getShownAttrOwnerId();
+    QString getShownAttrOwnerName();
+
 
 private:
     /* Pointer to the maind window of the applicaiton */
@@ -129,7 +165,14 @@ private:
     Controller* controller;
 
     /* Connection dialog, presented to user to give connection credentials */
-    ConnectionDialog* cd;
+    ConnectionDialog* connectionDialog;
+
+    EditAttributeDialog* editAttrDialog;
+
+    QList<int> shownDataIds;
+    QList<int> shownAttrIds;
+    int shownAttrOwnerId;
+    QString shownAttrOwnerName;
 
     /**
      * @brief initView
@@ -144,11 +187,19 @@ public slots:
     void searchButtonClicked();
     void attributeSearchUpdated(QString);
     void disconnectButtonPressed();
-    void dialogConnectPressed();
-    void dialogExitPressed();
+
+    /* Dialog button slots */
+    void connectionDialogConnectPressed();
+    void connectionDialogExitPressed();
+    void editAttrDialogAcceptPressed();
+    void editAttrDialogCancelPressed();
+
     void firstTimeDialog();
     void foundListDoubleClicked(QModelIndex);
     void resultTableRowDoubleClicked(QModelIndex);
+    void newAttributeClicked();
+    void editAttributeClicked();
+    void removeAttributeClicked();
 };
 
 #endif // VIEW_H

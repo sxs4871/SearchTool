@@ -33,12 +33,15 @@ public:
     QString getAttrName();
     QString getValue();
     QString getUnit();
+    int getId() const;
+    void setId(int id);
 
 private:
     /* AVU data contrainers */
     QString attrName;
     QString value;
     QString unit;
+    int id;
 
 };
 

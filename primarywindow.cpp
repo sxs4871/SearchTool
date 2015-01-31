@@ -2,6 +2,8 @@
 #include <controller.h>
 #include <QDateTime>
 #include <QTableView>
+#include <qdebug.h>
+#include <QProcess>
 
 PrimaryWindow::PrimaryWindow(Ui::MainWindow* _ui) {
     if (_ui == 0) {
@@ -26,8 +28,6 @@ void PrimaryWindow::initView() {
 
     /* LineEdit setup */
     ui->lineEdit_findAttr->setStyleSheet("QLineEdit { border: 1px solid gray; border-radius: 10px; }");
-    ui->lineEdit_value->setStyleSheet("QLineEdit { border: 1px solid gray; border-radius: 10px; }");
-    ui->lineEdit_unit->setStyleSheet("QLineEdit { border: 1px solid gray; border-radius: 10px; }");
     ui->lineEdit_query->setStyleSheet("QLineEdit { border: 1px solid gray; border-radius: 13px; }");
     ui->lineEdit_findAttr->setPlaceholderText("  Find attribute...");
     ui->lineEdit_query->setPlaceholderText("   Enter your query...");
@@ -77,6 +77,9 @@ void PrimaryWindow::setController(Controller* c) {
     QObject::connect(ui->button_disconnect, SIGNAL(clicked()), this, SLOT(disconnectButtonPressed()));
     QObject::connect(ui->list_foundAttr, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(foundListDoubleClicked(QModelIndex)));
     QObject::connect(ui->table_results, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(resultTableRowDoubleClicked(QModelIndex)));
+    QObject::connect(ui->button_newAttr, SIGNAL(clicked()), this, SLOT(newAttributeClicked()));
+    QObject::connect(ui->button_editAttr, SIGNAL(clicked()), this, SLOT(editAttributeClicked()));
+    QObject::connect(ui->button_removeAttr, SIGNAL(clicked()), this, SLOT(removeAttributeClicked()));
 }
 
 Controller* PrimaryWindow::getController() {
@@ -88,13 +91,41 @@ Ui::MainWindow* PrimaryWindow::getUI() {
 }
 
 void PrimaryWindow::askForNewConnection() {
-    cd = new ConnectionDialog(this);
-    cd->setFixedSize(cd->width(), cd->height());
-    cd->setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowTitleHint);
-    cd->setDefaults();
-    while (cd->exec() != QDialog::Accepted);
-    delete cd;
-    cd = 0;
+    connectionDialog = new ConnectionDialog(this);
+    connectionDialog->setFixedSize(connectionDialog->width(), connectionDialog->height());
+    connectionDialog->setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowTitleHint);
+    connectionDialog->setDefaults();
+    while (connectionDialog->exec() != QDialog::Accepted);
+    delete connectionDialog;
+    connectionDialog = 0;
+}
+
+void PrimaryWindow::editAttribute() {
+    QModelIndexList selectedRows = ui->table_attributes->selectionModel()->selectedRows();
+    if (selectedRows.size() != 1) {
+        return;
+    }
+    int row = selectedRows.at(0).row();
+    QString name = ui->table_attributes->item(row, 0)->text();
+    QString value = ui->table_attributes->item(row, 1)->text();
+    QString units = ui->table_attributes->item(row, 2)->text();
+    int metaId = shownAttrIds.at(row);
+    editAttrDialog = new EditAttributeDialog(this, metaId, name, value, units);
+    editAttrDialog->setFixedSize(editAttrDialog->width(), editAttrDialog->height());
+    editAttrDialog->setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowTitleHint);
+    while (editAttrDialog->exec() != QDialog::Accepted);
+    delete editAttrDialog;
+    editAttrDialog = 0;
+}
+
+void PrimaryWindow::addNewAttribute() {
+    QString fileName = shownAttrOwnerName;
+    editAttrDialog = new EditAttributeDialog(this, fileName);
+    editAttrDialog->setFixedSize(editAttrDialog->width(), editAttrDialog->height());
+    editAttrDialog->setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowTitleHint);
+    while (editAttrDialog->exec() != QDialog::Accepted);
+    delete editAttrDialog;
+    editAttrDialog = 0;
 }
 
 void PrimaryWindow::updateSearchResults(QSqlQuery result) {
@@ -111,6 +142,7 @@ void PrimaryWindow::updateSearchResults(QSqlQuery result) {
         return;
     }
     ui->label_queryMessage->setHidden(true);
+    shownDataIds.clear();
     int lastRow = 0;
     while (result.next()) {
         ui->table_results->insertRow(ui->table_results->rowCount());
@@ -125,6 +157,7 @@ void PrimaryWindow::updateSearchResults(QSqlQuery result) {
         } else {
             ui->table_results->setItem(lastRow, 2, new QTableWidgetItem("Invalid timestamp"));
         }
+        shownDataIds.append(result.value(3).toInt());
         lastRow++;
     }
 }
@@ -151,18 +184,33 @@ void PrimaryWindow::updateFoundAttributes(QStringList attributes) {
     ui->list_foundAttr->addItems(attributes);
 }
 
-void PrimaryWindow::showFileAttributes(QList<AVU> avus, QString fileName) {
+void PrimaryWindow::refreshFoundAttributes() {
+    QString currentSearch = ui->lineEdit_findAttr->text();
+    controller->attributeSearchUpdated(currentSearch);
+}
+
+void PrimaryWindow::showFileAttributes(QList<AVU> avus, QString fileName, int fileId) {
+    shownAttrOwnerId = fileId;
+    shownAttrOwnerName = fileName;
     QString title = "\"" + fileName + "\" attributes";
     ui->group_fileAttributes->setTitle(title);
     ui->table_attributes->setRowCount(0);
     int tableSize = avus.count();
+    shownAttrIds.clear();
     for (int i = 0; i < tableSize; i++) {
         AVU curAVU = avus.at(i);
         ui->table_attributes->insertRow(ui->table_attributes->rowCount());
         ui->table_attributes->setItem(i, 0, new QTableWidgetItem(curAVU.getAttrName()));
         ui->table_attributes->setItem(i, 1, new QTableWidgetItem(curAVU.getValue()));
         ui->table_attributes->setItem(i, 2, new QTableWidgetItem(curAVU.getUnit()));
+        shownAttrIds.append(curAVU.getId());
     }
+}
+
+void PrimaryWindow::removeAttributeFromTable(int metaId) {
+    int index = shownAttrIds.indexOf(metaId);
+    shownAttrIds.removeAt(index);
+    ui->table_attributes->removeRow(index);
 }
 
 void PrimaryWindow::displayConnection(QString dbName) {
@@ -184,21 +232,38 @@ void PrimaryWindow::closeConnection() {
     ui->button_disconnect->setVisible(false);
 }
 
-void PrimaryWindow::closeDialog() {
-    if (cd != 0) {
-        cd->accept();
+void PrimaryWindow::closeConnectionDialog() {
+    if (connectionDialog != 0) {
+        connectionDialog->accept();
+    }
+}
+
+void PrimaryWindow::closeEditAttrDialog() {
+    if (editAttrDialog != 0) {
+        editAttrDialog->accept();
     }
 }
 
 void PrimaryWindow::setDialogConnectionError(QString errorText) {
-    cd->setConnectionError(errorText);
+    connectionDialog->setConnectionError(errorText);
 }
 
 void PrimaryWindow::quit() {
-    closeDialog();
+    closeConnectionDialog();
     qApp->quit();
 }
 
+int PrimaryWindow::getMetaIdForRow(int row) {
+    return shownAttrIds.at(row);
+}
+
+int PrimaryWindow::getShownAttrOwnerId() {
+    return shownAttrOwnerId;
+}
+
+QString PrimaryWindow::getShownAttrOwnerName() {
+    return shownAttrOwnerName;
+}
 
 /* slots */
 
@@ -219,13 +284,29 @@ void PrimaryWindow::attributeSearchUpdated(QString text) {
     controller->attributeSearchUpdated(text);
 }
 
-void PrimaryWindow::dialogConnectPressed() {
-    QStringList connectionParams = cd->getConnectionInfo();
-    controller->connectButtonPressed(connectionParams);
+void PrimaryWindow::connectionDialogConnectPressed() {
+    QString sqlDriver = connectionDialog->getSqlDriver();
+    QString host = connectionDialog->getHost();
+    QString dbName = connectionDialog->getDbName();
+    QString username = connectionDialog->getUsername();
+    QString password = connectionDialog->getPassword();
+    controller->cdConnectButtonPressed(sqlDriver, host, dbName, username, password);
 }
 
-void PrimaryWindow::dialogExitPressed() {
-    controller->exitButtonPressed();
+void PrimaryWindow::connectionDialogExitPressed() {
+    controller->cdExitButtonPressed();
+}
+
+void PrimaryWindow::editAttrDialogAcceptPressed() {
+    QString name = editAttrDialog->getName();
+    QString value = editAttrDialog->getValue();
+    QString units = editAttrDialog->getUnits();
+    int metaId = editAttrDialog->getMetaId();
+    controller->eadAcceptButtonPressed(metaId, name, value, units);
+}
+
+void PrimaryWindow::editAttrDialogCancelPressed() {
+    controller->eadCancelButtonPressed();
 }
 
 void PrimaryWindow::firstTimeDialog() {
@@ -239,6 +320,27 @@ void PrimaryWindow::foundListDoubleClicked(QModelIndex listItem) {
 }
 
 void PrimaryWindow::resultTableRowDoubleClicked(QModelIndex tableItem) {
-    QString fileName = tableItem.data().toString();
-    controller->resultDoubleClicked(fileName);
+    int row = tableItem.row();
+    int column = 0;
+    QString fileName = ui->table_results->item(row, column)->text();
+    int fileId = shownDataIds.at(row);
+    controller->resultDoubleClicked(fileId, fileName);
+}
+
+void PrimaryWindow::editAttributeClicked() {
+    editAttribute();
+}
+
+void PrimaryWindow::newAttributeClicked() {
+    addNewAttribute();
+}
+
+void PrimaryWindow::removeAttributeClicked() {
+    QList<int> idsToRemove;
+    QModelIndexList select = ui->table_attributes->selectionModel()->selectedRows();
+    foreach (QModelIndex mi, select) {
+        int row = mi.row();
+        idsToRemove.append(shownAttrIds.at(row));
+    }
+    controller->removeAttributes(idsToRemove);
 }

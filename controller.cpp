@@ -12,8 +12,8 @@ void Controller::connectToView(PrimaryWindow* _view) {
 }
 
 
-bool Controller::connectModelToDb(QString host, QString dbName, QString username, QString password) {
-    bool connected = model->connectToDb(host, dbName, username, password);
+bool Controller::connectModelToDb(QString& sqlDriver, QString& host, QString& dbName, QString& username, QString& password) {
+    bool connected = model->connectToDb(sqlDriver, host, dbName, username, password);
     if (connected) {
         model->readAllAttributes();
     }
@@ -41,14 +41,10 @@ void Controller::disconnectButtonPressed() {
     view->askForNewConnection();
 }
 
-void Controller::connectButtonPressed(QStringList connectionParams) {
-    QString host = connectionParams[0];
-    QString dbName = connectionParams[1];
-    QString username = connectionParams[2];
-    QString password = connectionParams[3];
-    bool connected = connectModelToDb(host, dbName, username, password);
+void Controller::cdConnectButtonPressed(QString& sqlDriver, QString& host, QString& dbName, QString& username, QString& password) {
+    bool connected = connectModelToDb(sqlDriver, host, dbName, username, password);
     if (connected) {
-        view->closeDialog();
+        view->closeConnectionDialog();
         view->displayConnection(dbName);
     } else {
         QString errorText = model->getLastError().databaseText();
@@ -56,13 +52,56 @@ void Controller::connectButtonPressed(QStringList connectionParams) {
     }
 }
 
-void Controller::exitButtonPressed() {
+void Controller::cdExitButtonPressed() {
     view->quit();
 }
 
-void Controller::resultDoubleClicked(QString fileName) {
-    QList<AVU> avus = model->getFileAttributes(fileName);
-    view->showFileAttributes(avus, fileName);
+void Controller::eadAcceptButtonPressed(int metaId, QString &name, QString &value, QString &units) {
+    QRegularExpression whitespace("^\\s*$");
+    if (! (whitespace.match(name).hasMatch() && whitespace.match(value).hasMatch())) {
+        if (metaId == -1) {
+            int dataId = view->getShownAttrOwnerId();
+            model->addNewAttribute(dataId, name, value, units);
+        } else {
+            model->editAttribute(metaId, name, value, units);
+        }
+        attributeEditCompleted();
+        view->closeEditAttrDialog();
+    }
 }
 
+void Controller::attributeEditCompleted() {
+    model->readAllAttributes();
+    view->refreshFoundAttributes();
+    resultDoubleClicked(view->getShownAttrOwnerId(), view->getShownAttrOwnerName());
+}
+
+void Controller::eadCancelButtonPressed() {
+    view->closeEditAttrDialog();
+}
+
+void Controller::resultDoubleClicked(int fileId, QString fileName) {
+    QList<AVU> avus = model->getFileAttributes(fileId);
+    view->showFileAttributes(avus, fileName, fileId);
+}
+
+void Controller::removeAttributes(QList<int> idsToRemove) {
+    foreach (int id, idsToRemove) {
+        QString removeMetadata = QString("DELETE FROM r_meta_main WHERE meta_id=\'%1\'").arg(id);
+        QString removeMetaMapQuery = QString("DELETE FROM r_objt_metamap WHERE meta_id=\'%1\'").arg(id);
+        QSqlQuery first = model->runSqlQuery(removeMetaMapQuery);
+        bool firstOk = first.isActive();
+        if (!firstOk) {
+            qDebug() << "Error: " + first.lastError().text();
+        }
+        QSqlQuery second = model->runSqlQuery(removeMetadata);
+        bool secondOk = second.isActive();
+        if (!secondOk) {
+            qDebug() << "Error: " + second.lastError().text();
+        }
+        if (firstOk && secondOk) {
+            attributeEditCompleted();
+        }
+    }
+}
 

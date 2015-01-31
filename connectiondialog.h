@@ -39,15 +39,35 @@ public:
     void setDefaults();
 
     /**
-     * @brief getConnectionInfo - grabs data, entered by the user, from
-     *                            the input boxes.
-     * @return - list of connection information pieces.
-     *           1. Host name
-     *           2. Database name
-     *           3. Username
-     *           4. User password
+     * @brief getSqlDriver - obtain user input for which sql driver
+     *                       should be used for connection to the database
+     * @return - sql driver name
      */
-    QStringList getConnectionInfo();
+    QString getSqlDriver();
+
+    /**
+     * @brief getHost - get connection info from user
+     * @return - host name for connection
+     */
+    QString getHost();
+
+    /**
+     * @brief getDbName - get connection info from user
+     * @return - database name for connection
+     */
+    QString getDbName();
+
+    /**
+     * @brief getUsername - get connection info from user
+     * @return - username for connection
+     */
+    QString getUsername();
+
+    /**
+     * @brief getPassword - get connection info from user
+     * @return - password for connection
+     */
+    QString getPassword();
 
     /**
      * @brief setConnectionError - displays an error, in case connection
@@ -57,7 +77,7 @@ public:
     void setConnectionError(QString errorText);
 
 private:
-    /* Qt UI reference for this dialog (created in Forms/connectiondialog.ui */
+    /* Qt UI reference for this dialog (created in Forms/connectiondialog.ui) */
     Ui::ConnectionDialog *ui;
 
     /* Reference to the View object to let it know, when this dialog can be closed */

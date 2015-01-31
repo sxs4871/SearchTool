@@ -27,3 +27,11 @@ QString AVU::getValue() {
 QString AVU::getUnit() {
     return unit;
 }
+
+int AVU::getId() const {
+    return id;
+}
+
+void AVU::setId(int _id) {
+    this->id = _id;
+}

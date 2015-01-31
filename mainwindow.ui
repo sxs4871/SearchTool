@@ -182,8 +182,11 @@
       <x>20</x>
       <y>321</y>
       <width>361</width>
-      <height>231</height>
+      <height>201</height>
      </rect>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
     </property>
    </widget>
    <widget class="QGroupBox" name="group_fileAttributes">
@@ -198,6 +201,45 @@
     <property name="title">
      <string>File attributes</string>
     </property>
+    <widget class="QPushButton" name="button_newAttr">
+     <property name="geometry">
+      <rect>
+       <x>2</x>
+       <y>222</y>
+       <width>118</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>New</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="button_removeAttr">
+     <property name="geometry">
+      <rect>
+       <x>241</x>
+       <y>222</y>
+       <width>118</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Remove</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="button_editAttr">
+     <property name="geometry">
+      <rect>
+       <x>121</x>
+       <y>222</y>
+       <width>118</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Edit</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="group_setValue">
     <property name="enabled">

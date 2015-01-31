@@ -13,6 +13,7 @@ TARGET = SearchTool
 TEMPLATE = app
 
 CONFIG += C++11
+         static
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -23,7 +24,8 @@ SOURCES += main.cpp\
     avu.cpp \
     queryformatexception.cpp \
     irodsquerymodel.cpp \
-    primarywindow.cpp
+    primarywindow.cpp \
+    editattributedialog.cpp
 
 HEADERS  += mainwindow.h \
     controller.h \
@@ -33,7 +35,9 @@ HEADERS  += mainwindow.h \
     avu.h \
     queryformatexception.h \
     irodsquerymodel.h \
-    primarywindow.h
+    primarywindow.h \
+    editattributedialog.h
 
 FORMS    += mainwindow.ui \
-    connectiondialog.ui
+    connectiondialog.ui \
+    editattributedialog.ui

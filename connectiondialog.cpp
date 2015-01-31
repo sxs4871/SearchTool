@@ -16,9 +16,12 @@ ConnectionDialog::ConnectionDialog(PrimaryWindow* _parentView, QWidget *parent) 
     ui->lineEdit_username->setPlaceholderText("Username...");
     ui->lineEdit_password->setPlaceholderText("Password...");
     ui->lineEdit_password->setEchoMode(QLineEdit::Password);
+    ui->comboBox_sqlDrivers->addItem("");
+    QStringList sqlDrivers = QSqlDatabase::drivers();
+    ui->comboBox_sqlDrivers->addItems(sqlDrivers);
 
-    QObject::connect(ui->button_connect, SIGNAL(clicked()), parentView, SLOT(dialogConnectPressed()));
-    QObject::connect(ui->button_exit, SIGNAL(clicked()), parentView, SLOT(dialogExitPressed()));
+    QObject::connect(ui->button_connect, SIGNAL(clicked()), parentView, SLOT(connectionDialogConnectPressed()));
+    QObject::connect(ui->button_exit, SIGNAL(clicked()), parentView, SLOT(connectionDialogExitPressed()));
 }
 
 ConnectionDialog::~ConnectionDialog()
@@ -33,20 +36,28 @@ void ConnectionDialog::setDefaults() {
     ui->lineEdit_password->setText("irods");
 }
 
-
-
-QStringList ConnectionDialog::getConnectionInfo() {
-    QStringList toReturn;
-    toReturn.push_back(ui->lineEdit_host->text()); 
-    toReturn.push_back(ui->lineEdit_dbName->text());
-    toReturn.push_back(ui->lineEdit_username->text());
-    toReturn.push_back(ui->lineEdit_password->text());
-    return toReturn;
-}
-
 void ConnectionDialog::setConnectionError(QString errorText) {
     ui->label_error->setText("<font color=\"red\">Database error:</font><p></p>" + errorText);
     ui->label_error->adjustSize();
     this->setFixedHeight(ui->label_error->y() + ui->label_error->height() + 10);
 }
 
+QString ConnectionDialog::getSqlDriver() {
+    return ui->comboBox_sqlDrivers->currentText();
+}
+
+QString ConnectionDialog::getHost() {
+    return ui->lineEdit_host->text();
+}
+
+QString ConnectionDialog::getDbName() {
+    return ui->lineEdit_dbName->text();
+}
+
+QString ConnectionDialog::getUsername() {
+    return ui->lineEdit_username->text();
+}
+
+QString ConnectionDialog::getPassword() {
+    return ui->lineEdit_password->text();
+}
