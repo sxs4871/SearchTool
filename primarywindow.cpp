@@ -205,6 +205,9 @@ void PrimaryWindow::showFileAttributes(QList<AVU> avus, QString fileName, int fi
         ui->table_attributes->setItem(i, 2, new QTableWidgetItem(curAVU.getUnit()));
         shownAttrIds.append(curAVU.getId());
     }
+    ui->button_newAttr->setEnabled(true);
+    ui->button_editAttr->setEnabled(true);
+    ui->button_removeAttr->setEnabled(true);
 }
 
 void PrimaryWindow::removeAttributeFromTable(int metaId) {

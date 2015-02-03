@@ -202,6 +202,9 @@
      <string>File attributes</string>
     </property>
     <widget class="QPushButton" name="button_newAttr">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>2</x>
@@ -215,6 +218,9 @@
      </property>
     </widget>
     <widget class="QPushButton" name="button_removeAttr">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>241</x>
@@ -228,6 +234,9 @@
      </property>
     </widget>
     <widget class="QPushButton" name="button_editAttr">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>121</x>
