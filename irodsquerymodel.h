@@ -74,6 +74,10 @@ public:
 
     void editAttribute(int metaId, QString &name, QString &value, QString &units);
 
+    void clearAttributes();
+
+    void generateAttributes(int amount);
+
     /**
      * @brief getFileAttributes
      * Obtains existing metadata for the file

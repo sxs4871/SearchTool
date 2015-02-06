@@ -25,7 +25,7 @@
      <rect>
       <x>20</x>
       <y>50</y>
-      <width>161</width>
+      <width>191</width>
       <height>241</height>
      </rect>
     </property>
@@ -37,7 +37,7 @@
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>141</width>
+       <width>171</width>
        <height>21</height>
       </rect>
      </property>
@@ -53,7 +53,7 @@
       <rect>
        <x>10</x>
        <y>50</y>
-       <width>141</width>
+       <width>171</width>
        <height>181</height>
       </rect>
      </property>
@@ -256,72 +256,73 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>200</x>
+      <x>230</x>
       <y>50</y>
-      <width>171</width>
+      <width>141</width>
       <height>241</height>
      </rect>
     </property>
     <property name="title">
-     <string>Set value and unit</string>
+     <string>Reloading</string>
     </property>
-    <widget class="QLineEdit" name="lineEdit_value">
+    <widget class="QPushButton" name="button_regenAttr">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>60</y>
-       <width>141</width>
-       <height>31</height>
+       <y>170</y>
+       <width>121</width>
+       <height>51</height>
       </rect>
      </property>
+     <property name="text">
+      <string>Re-generate
+Attributes</string>
+     </property>
     </widget>
-    <widget class="QLineEdit" name="lineEdit_unit">
+    <widget class="QSpinBox" name="spinBox_amountAttrs">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>120</y>
-       <width>141</width>
-       <height>31</height>
+       <y>130</y>
+       <width>121</width>
+       <height>27</height>
       </rect>
      </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>100</number>
+     </property>
+     <property name="value">
+      <number>3</number>
+     </property>
     </widget>
-    <widget class="QLabel" name="label_value">
+    <widget class="QLabel" name="label_avgAmt">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>40</y>
-       <width>67</width>
-       <height>17</height>
+       <width>121</width>
+       <height>81</height>
       </rect>
      </property>
      <property name="text">
-      <string>Value</string>
+      <string>Average number
+of attributes
+generated per object</string>
      </property>
-    </widget>
-    <widget class="QLabel" name="label_unit">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>100</y>
-       <width>67</width>
-       <height>17</height>
-      </rect>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
      </property>
-     <property name="text">
-      <string>Unit</string>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
-    </widget>
-    <widget class="QPushButton" name="button_acceptValue">
-     <property name="geometry">
-      <rect>
-       <x>8</x>
-       <y>200</y>
-       <width>151</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Accept</string>
+     <property name="wordWrap">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>

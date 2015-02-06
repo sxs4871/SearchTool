@@ -4,6 +4,8 @@
 #include <irodsquerymodel.h>
 #include <primarywindow.h>
 #include <controller.h>
+#include "unitsfixer.h"
+#include "attributegenerator.h"
 
 using namespace std;
 

@@ -25,7 +25,9 @@ SOURCES += main.cpp\
     queryformatexception.cpp \
     irodsquerymodel.cpp \
     primarywindow.cpp \
-    editattributedialog.cpp
+    editattributedialog.cpp \
+    unitsfixer.cpp \
+    attributegenerator.cpp
 
 HEADERS  += mainwindow.h \
     controller.h \
@@ -36,8 +38,12 @@ HEADERS  += mainwindow.h \
     queryformatexception.h \
     irodsquerymodel.h \
     primarywindow.h \
-    editattributedialog.h
+    editattributedialog.h \
+    unitsfixer.h \
+    attributegenerator.h
 
 FORMS    += mainwindow.ui \
     connectiondialog.ui \
     editattributedialog.ui
+
+DEFINES += PROJECT_PATH=\"\\\"$$PWD\\\"\"

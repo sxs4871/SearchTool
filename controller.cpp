@@ -105,3 +105,9 @@ void Controller::removeAttributes(QList<int> idsToRemove) {
     }
 }
 
+void Controller::regenerateAttributes(int avgPerFile) {
+    model->clearAttributes();
+    model->generateAttributes(avgPerFile);
+    attributeEditCompleted();
+}
+

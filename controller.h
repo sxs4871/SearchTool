@@ -116,6 +116,8 @@ public:
      */
     void removeAttributes(QList<int> idsToRemove);
 
+    void regenerateAttributes(int avgPerFile);
+
 private:
     /* References to model and view */
     iRODSQueryModel* model;

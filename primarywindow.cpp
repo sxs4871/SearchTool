@@ -80,6 +80,7 @@ void PrimaryWindow::setController(Controller* c) {
     QObject::connect(ui->button_newAttr, SIGNAL(clicked()), this, SLOT(newAttributeClicked()));
     QObject::connect(ui->button_editAttr, SIGNAL(clicked()), this, SLOT(editAttributeClicked()));
     QObject::connect(ui->button_removeAttr, SIGNAL(clicked()), this, SLOT(removeAttributeClicked()));
+    QObject::connect(ui->button_regenAttr, SIGNAL(clicked()), this, SLOT(regenerateAttributes()));
 }
 
 Controller* PrimaryWindow::getController() {
@@ -346,4 +347,8 @@ void PrimaryWindow::removeAttributeClicked() {
         idsToRemove.append(shownAttrIds.at(row));
     }
     controller->removeAttributes(idsToRemove);
+}
+
+void PrimaryWindow::regenerateAttributes() {
+    controller->regenerateAttributes(ui->spinBox_amountAttrs->value());
 }

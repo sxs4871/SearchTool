@@ -200,6 +200,7 @@ public slots:
     void newAttributeClicked();
     void editAttributeClicked();
     void removeAttributeClicked();
+    void regenerateAttributes();
 };
 
 #endif // VIEW_H

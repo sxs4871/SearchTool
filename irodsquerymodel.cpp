@@ -2,6 +2,7 @@
 #include <controller.h>
 #include <userquery.h>
 #include <assert.h>
+#include "attributegenerator.h"
 
 iRODSQueryModel* iRODSQueryModel::instance = NULL;
 Controller* iRODSQueryModel::controller = NULL;
@@ -41,7 +42,6 @@ void iRODSQueryModel::disconnect() {
 }
 
 QSqlQuery iRODSQueryModel::runSqlQuery(QString& queryString) {
-    qDebug() << "Running query: " + queryString;
     QSqlQuery query(db);
     query.exec(queryString);
     return query;
@@ -121,6 +121,34 @@ void iRODSQueryModel::editAttribute(int metaId, QString &name, QString &value, Q
                                 "SET meta_attr_name=\'%2\', meta_attr_value=\'%3\', meta_attr_unit=\'%4\', modify_ts=\'%5\'"
                                 "WHERE meta_id=\'%1\' ").arg(QString::number(metaId), name, value, units, timestamp);
     runSqlQuery(editQuery);
+}
+
+void iRODSQueryModel::clearAttributes() {
+    QString clearMetaMain("DELETE FROM r_meta_main");
+    QString clearMetaMap("DELETE FROM r_objt_metamap");
+    runSqlQuery(clearMetaMain);
+    runSqlQuery(clearMetaMap);
+}
+
+void iRODSQueryModel::generateAttributes(int averagePerFile) {
+    int max = averagePerFile * 2;
+    QString getMetaIdsQuery("SELECT data_id FROM r_data_main");
+    QSqlQuery result = runSqlQuery(getMetaIdsQuery);
+    QList<int> dataIds;
+    while (result.next()) {
+        dataIds.append(result.value(0).toInt());
+    }
+    AttributeGenerator* attrGen = new AttributeGenerator(this);
+    foreach (int dataId, dataIds) {
+        int numAttributes = (qrand() % max) + 1;
+        QList<AVU*> avus = attrGen->generateAttributes(numAttributes);
+        foreach (AVU* avu, avus) {
+            QString name = avu->getAttrName();
+            QString value = avu->getValue();
+            QString unit = avu->getUnit();
+            addNewAttribute(dataId, name, value, unit);
+        }
+    }
 }
 
 QStringList iRODSQueryModel::findAttributes(QString attrNamePart) {
